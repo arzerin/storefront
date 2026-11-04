@@ -11,11 +11,13 @@ class CreateStripeCheckoutSession
 {
     public function createFromCart(Cart $cart): Checkout
     {
-        return $cart->user
-            ->allowPromotionCodes()
-            ->checkout(
+        $successUrl = config('services.stripe_checkout.success_url') ?: route('checkout.success');
+        $successUrl .= (str_contains($successUrl, '?') ? '&' : '?').'session_id={CHECKOUT_SESSION_ID}';
+
+        return $cart->user->checkout(
             $this->formatCartItems($cart->items),
                 [
+                    'allow_promotion_codes' => true,
                     'customer_update' => [
                         'shipping' => 'auto',
                     ],
@@ -24,8 +26,8 @@ class CreateStripeCheckoutSession
                             'US', 'NL'
                         ]
                     ],
-                    'success_url' => config('services.stripe_checkout.success_url') ?: route('checkout.status') . '?session_id={CHECKOUT_SESSION_ID}',
-                    'cancel_url' => config('services.stripe_checkout.cancel_url') ?: route('cart.show'),
+                    'success_url' => $successUrl,
+                    'cancel_url' => config('services.stripe_checkout.cancel_url') ?: route('checkout.cancel'),
                     'shipping_options' => config('services.stripe_checkout.shipping_rate_id')
                         ? [['shipping_rate' => config('services.stripe_checkout.shipping_rate_id')]]
                         : [],

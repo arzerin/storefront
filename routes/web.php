@@ -23,6 +23,7 @@ Route::redirect('/dashboard', '/')->name('dashboard');
 
 Route::get('/products/{product}', ShowProduct::class)->name('product.show');
 Route::get('/cart', ShowCart::class)->name('cart.show');
+Route::view('/checkout/checkout/cancel', 'checkout.cancel')->name('checkout.cancel');
 
 
 Route::middleware([
@@ -31,6 +32,14 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/checkout-status', CheckoutStatus::class)->name('checkout.status');
+    Route::get('/checkout/success', function () {
+        $sessionId = request()->query('session_id');
+        $order = $sessionId
+            ? auth()->user()->orders()->where('stripe_checkout_session_id', $sessionId)->first()
+            : null;
+
+        return view('checkout.success', compact('sessionId', 'order'));
+    })->name('checkout.success');
 
     Route::get('/order/{orderId}', ShowOrder::class)->name('order.show');
     Route::get('my-orders', MyOrders::class)->name('my.orders');
