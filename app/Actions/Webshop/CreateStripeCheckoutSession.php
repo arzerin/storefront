@@ -47,7 +47,7 @@ class CreateStripeCheckoutSession
                 [
                     'price_data' => [
                         'currency' => 'USD',
-                        'unit_amount' => $item->product->price->getAmount(),
+                        'unit_amount' => $item->product->unitPriceCentsForQuantity($item->quantity),
                         'product_data' => [
                             'name' => $item->product->name,
                             'description' => "Size: {$item->variant->size} Color: {$item->variant->color}",

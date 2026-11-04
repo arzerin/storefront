@@ -28,6 +28,13 @@
             <li class="nav-header text-uppercase small text-white-50 px-3 pb-2">Catalogue</li>
             <li class="nav-item"><a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.index') ? 'active' : '' }}"><i class="nav-icon bi bi-grid-3x3-gap"></i><p>Products</p></a></li>
             <li class="nav-item"><a href="{{ route('admin.products.create') }}" class="nav-link {{ request()->routeIs('admin.products.create') ? 'active' : '' }}"><i class="nav-icon bi bi-plus-square"></i><p>Add product</p></a></li>
+            <li class="nav-item"><a href="{{ route('admin.categories.index') }}" class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"><i class="nav-icon bi bi-tags"></i><p>Categories</p></a></li>
+            <li class="nav-item"><a href="{{ route('admin.collections.index') }}" class="nav-link {{ request()->routeIs('admin.collections.*') ? 'active' : '' }}"><i class="nav-icon bi bi-collection"></i><p>Collections</p></a></li>
+            <li class="nav-item"><a href="{{ route('admin.manufacturers.index') }}" class="nav-link {{ request()->routeIs('admin.manufacturers.*') ? 'active' : '' }}"><i class="nav-icon bi bi-building"></i><p>Manufacturers</p></a></li>
+            <li class="nav-header text-uppercase small text-white-50 px-3 pt-3 pb-2">Storefront</li>
+            <li class="nav-item"><a href="{{ route('admin.site-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.site-settings.*') ? 'active' : '' }}"><i class="nav-icon bi bi-sliders"></i><p>Site settings</p></a></li>
+            <li class="nav-item"><a href="{{ route('admin.blocks.index') }}" class="nav-link {{ request()->routeIs('admin.blocks.*') ? 'active' : '' }}"><i class="nav-icon bi bi-layout-text-window"></i><p>Blocks</p></a></li>
+            <li class="nav-item"><a href="{{ route('admin.footer-menu.index') }}" class="nav-link {{ request()->routeIs('admin.footer-menu.*') ? 'active' : '' }}"><i class="nav-icon bi bi-list-nested"></i><p>Footer menu</p></a></li>
         </ul></nav></div>
     </aside>
     <main class="app-main">

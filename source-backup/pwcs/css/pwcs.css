@@ -1,0 +1,856 @@
+/* $Id: pwcs.css,v 1.6.2.1 2008/05/03 13:21:24 rasel kabir Exp $ */
+
+input:focus, 
+a, 
+a img, 
+a:hover, 
+a:visited {
+  outline:none;
+}
+
+img {
+  vertical-align:middle;
+}
+
+.pwcs-loading { 
+  background: transparent url(../images/loading.gif) 50% 50% no-repeat !important;
+}
+.pwcs-small-loading {
+  height: 16px;
+  width: 16px;
+  margin:auto;
+  background: transparent url(../images/small-loading.gif) 50% 50% no-repeat !important;
+}
+
+.pwcs-image-pre-loader {
+  margin:auto;
+  background: transparent url(../images/image-pre-loader.gif) 50% 50% no-repeat !important;
+}
+
+.manufacturers_all {
+  margin-top: 10px;
+}
+
+/******* Cart CSS >> *******/
+.tmb_image_holder{
+  height:84px;
+  overflow:hidden;
+  padding:5px 0;
+  text-align:center;
+}
+.tmb_image_holder .info-holder{
+  clear:both;
+  padding-top:20px;
+  font-size:12px;
+  text-align:left;
+}
+.info-holder {
+  margin-top: 15px;
+  text-align:left;
+  /*height:140px;*/
+}
+.cartitem-inner{
+  padding-bottom:20px;
+}
+
+.cartitem-operation{
+  position:absolute;
+  bottom:2px;
+  text-align:center;
+}
+
+.total_count {
+  font-weight: bold;
+  margin: 5px 0;
+}
+.total_amount {
+  background-color:#DDDDDD;
+  font-size:13px;
+  font-weight:bold;
+  margin:10px 0 0;
+  padding:5px 10px;
+  text-align:left;
+}
+.info-holder p {
+  margin:3px 0;
+}
+/******* << Cart CSS *******/
+
+/*** START Product single view default CSS ***/
+.product_box_class {
+  float:left;
+  height:auto;
+  position:relative;
+  z-index:0;
+  text-align:center;
+  margin: 5px;
+}
+.single_product_image {
+  border:1px solid #DDD;
+  line-height:0;
+  margin:0 auto;
+  overflow:hidden;
+  padding:4px;
+}
+.product_title {
+  font-weight:bold;
+  margin-top:2px;
+}
+.product_element {
+  font-size:0.9em;
+  margin-top:2px;
+  overflow:hidden;
+}
+.product_buy_button {
+  text-align:center;
+  overflow:hidden;
+  font-size:0.9em;
+}
+.title {
+  font-weight:bold;
+}
+
+.product_element_price p {
+  margin: 2px 0;
+}
+/*** END Product single view default CSS ***/
+
+/*** START Single product view mini ***/
+.product_mini_box_class {
+  /* dont delete this css class */
+}
+.product_mini_box_class .product_title {
+  font-size:0.9em;
+  margin-top:1px;
+}
+.product_mini_box_class .single_product_image{
+  height: 70px;
+  width: 70px;
+  padding: 2px;
+}
+/*** END Single product view mini ***/
+
+/*** START Single product view small ***/
+.product_small_box_class {
+  /* dont delete this css class */
+}
+.product_small_box_class .product_title {
+  margin-top:1px;
+}
+.product_small_box_class .single_product_image{
+
+}
+/*** END Single product view small ***/
+
+/*** START Single product view normal ***/
+.product_normal_box_class {
+  border-bottom:1px solid #DDD;
+  padding-bottom:10px;
+  width:170px;
+}
+.product_normal_box_class .single_product_image {
+  height:160px;
+  width:135px;
+}
+.product_normal_box_class:hover {
+  border-bottom:1px solid #AAA;
+}
+.product_normal_box_class .product_shortdetails {
+  height:55px;
+  overflow: hidden;
+  font-size: 0.9em;
+  line-height: 1.3em;
+  margin-top: 2px;
+}
+.product_normal_box_class .product_element {
+  height: 20px;
+}
+.product_normal_box_class .product_element_price {
+  height: 60px;
+}
+
+/*** END Single product view normal ***/
+
+/*** START Single product view normal2 ***/
+.product_normal2_box_class {
+  background: url("../images/productbox_normal2.jpg") no-repeat scroll 0 0 transparent;
+  border-bottom: medium none;
+  height: 202px;
+  width: 235px;
+  margin: 2px;
+}
+.product_normal2_box_class .product_title{
+  height: 40px;
+  line-height: 40px;
+  padding-left: 15px;
+}
+.product_normal2_box_class .product_title a{
+  float:left;
+}
+.product_normal2_box_class .imageandprice {
+  float: right;
+  height: 110px;
+  margin: 5px 15px 5px 5px;
+  overflow: hidden;
+  width: 85px;
+}
+.product_normal2_box_class .single_product_image {
+  border: medium none;
+  height: 85px;
+  width: 85px;
+}
+.product_normal2_box_class:hover {
+  border-bottom: none;
+}
+
+.product_normal2_box_class .product_buy_button {
+  bottom: 10px;
+  font-size: 1em;
+  overflow: hidden;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
+.product_normal2_box_class .product_shortdetails {
+  font-size: 0.95em;
+  height: 125px;
+  line-height: 1.2em;
+  margin-left: 15px;
+  margin-top: 5px;
+  overflow: visible;
+  text-align: left;
+}
+.product_normal2_box_class .product_element {
+  height: 20px;
+}
+.product_normal2_box_class .product_element_price {
+  font-weight:bold;
+}
+/*** END Single product view normal ***/
+
+/*** START Single product view normal3 ***/
+.product_normal3_box_class {
+  height: 380px;
+  padding: 5px;
+  width: 280px;
+  margin: 2px;
+}
+.product_normal3_box_class:hover {
+
+}
+.product_normal3_box_class .product_title {
+
+}
+.product_normal3_box_class .product_title a {
+
+}
+
+.product_normal3_box_class .single_product_image {
+  height: 260px;
+  width: 260px;
+}
+.product_normal3_box_class .product_element_price {
+  
+}
+.product_normal3_box_class .product_element_price p {
+  display: inline-block;
+  padding: 5px;
+}
+.product_normal3_box_class .button_holder {
+  bottom: 5px;
+  overflow: hidden;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
+/*** END Single product view normal3 ***/
+
+
+/*** START Single product view wide ***/
+.product_wide_box_class {
+  text-align: left;
+  float: none;
+  border: 1px solid #DDDDDD;
+  padding: 4px;
+}
+.product_wide_box_class .single_product_image {
+  float: left;
+  margin: 5px;
+  padding: 5px;
+  width: 150px;
+}
+
+.product_wide_box_class .product_header {
+  padding: 5px;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.product_wide_box_class .info_holder {
+  margin: 5px 5px 45px;
+  padding: 5px;
+}
+
+.product_wide_box_class .product_element{
+  font-size:1em;
+}
+.product_wide_box_class .product_shortdetails {
+  font-size: 1em;
+  line-height: 1.5em;
+  margin-top: 5px;
+}
+.product_wide_box_class .button_holder {
+  border: 1px solid #CACACA;
+  bottom: 5px;
+  float: right;
+  margin: 5px;
+  padding: 6px 10px;
+  position: absolute;
+  right: 5px;
+  text-align: center;
+}
+
+.product_wide_box_class .button_holder a {
+  margin: 5px;
+}
+/*** END Single product view wide ***/
+
+/*** START Single product view wide2 ***/
+.product_wide2_box_class {
+  text-align: left;
+  float: none;
+  border: 1px solid #DDDDDD;
+  padding: 10px;
+}
+.product_wide2_box_class .leftcol {
+  float: left;
+  width: 210px;
+}
+.product_wide2_box_class .single_product_image {
+  width: 200px;
+}
+.product_wide2_box_class .product_header {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.product_wide2_box_class .center_liquid{
+  float: left;
+  margin: 0 -100px 0 -210px;
+  width: 100%;
+}
+
+.product_wide2_box_class .info_holder {
+   margin: 0 100px 0 210px;
+  padding: 10px 2px 10px 10px;
+}
+.product_wide2_box_class .info_holder .product_element{
+  font-size: 1em;
+}
+.product_wide2_box_class .product_shortdetails {
+  font-size: 1em;
+  line-height: 1.5em;
+  margin-top: 5px;
+}
+.product_wide2_box_class .moredetailslink {
+  bottom: 10px;
+  padding: 3px 10px;
+  position: absolute;
+  right: 150px;
+  text-align: right;
+}
+.product_wide2_box_class .moredetailslink a{
+   padding: 4px 2px 4px 18px;
+}
+
+.product_wide2_box_class .button_holder {
+  float: right;
+  padding: 10px 0;
+  width: 100px;
+}
+.product_wide2_box_class .button_holder .button_element{
+  font-size:1em;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.product_wide2_box_class .button_holder .button_div{
+  text-align: center;
+}
+.product_wide2_box_class .button_holder a {
+  /*margin: 0 5px;*/
+}
+.product_wide2_box_class .productlist_attribute {
+  border: 1px solid #DDDDDD;
+  margin: 5px 0;
+  padding: 5px;
+}
+.product_wide2_box_class .productlist_attribute .attr_group_select {
+  float: right;
+  width: 130px;
+}
+.product_wide2_box_class .productlist_attribute .attr_group_select select {
+  width: 130px;
+}
+
+/*** END Single product view wide2 ***/
+
+/*** START Single product view wide3 ***/
+.product_wide3_box_class {
+  text-align: left;
+  float: none;
+  border: 1px solid #DDDDDD;
+  padding: 10px;
+}
+.product_wide3_box_class .leftcol {
+  float: left;
+  width: 210px;
+}
+.product_wide3_box_class .single_product_image {
+  width: 200px;
+}
+.product_wide3_box_class .product_header {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.product_wide3_box_class .center_liquid{
+  float: left;
+  margin: 0 -100px 0 -210px;
+  width: 100%;
+}
+.product_wide3_box_class .info_holder {
+   margin: 0 100px 0 210px;
+  padding: 10px 2px 10px 10px;
+}
+.product_wide3_box_class .info_holder .product_element{
+  font-size: 1em;
+}
+.product_wide3_box_class .product_shortdetails {
+  font-size: 1em;
+  line-height: 1.5em;
+  margin-top: 5px;
+}
+.product_wide3_box_class .moredetailslink {
+  bottom: 10px;
+  padding: 3px 10px;
+  position: absolute;
+  right: 150px;
+  text-align: right;
+}
+.product_wide3_box_class .moredetailslink a{
+   padding: 4px 2px 4px 18px;
+}
+
+.product_wide3_box_class .button_holder {
+  float: right;
+  padding: 10px 0;
+  width: 100px;
+}
+.product_wide3_box_class .button_holder .button_element{
+  font-size:1em;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.product_wide3_box_class .button_holder .button_div{
+  text-align: center;
+}
+.product_wide3_box_class .button_holder a {
+  /*margin: 0 5px;*/
+}
+.product_wide3_box_class .productlist_attribute {
+  border: 1px solid #DDDDDD;
+  margin: 5px 0;
+  padding: 5px;
+  text-align:center;
+}
+.product_wide3_box_class .productlist_attribute .attr_group_select {
+  float: right;
+  width: 130px;
+  padding-left: 10px;
+}
+.product_wide3_box_class .productlist_attribute .attr_group_select select {
+  width: 130px;
+}
+.product_wide3_box_class .pwcs_productdeatils_options_main .each_option {
+  margin:5px;
+  clear: none;
+  display:inline-block;
+}
+.product_wide3_box_class .pwcs_productdeatils_options_main .option_buttons {
+  margin-top: 2px; 
+  text-align: center;
+}
+
+/*** END Single product view wide3 ***/
+
+/*** START Single product view search ***/
+.product_search_box_class {
+  text-align: left;
+  float: none;
+  border-bottom: 1px solid #DDDDDD;
+  padding: 4px;
+}
+.product_search_box_class .single_product_image {
+  float: left;
+  margin: 0 10px 0 0;
+  padding: 3px;
+  width: 80px;
+}
+
+.product_search_box_class .product_header {
+  font-size: 1.3em;
+  font-weight: bold;
+  padding: 0 0 5px;
+}
+
+.product_search_box_class .info_holder {
+  margin: 0;
+  padding: 0;
+}
+
+.product_search_box_class .product_element{
+  font-size:.9em;
+}
+.product_search_box_class .product_shortdetails {
+  font-size: 1em;
+  line-height: 1.5em;
+  margin-top: 5px;
+}
+/*** END Single product view search ***/
+
+
+div#products_details_others_tab ul.jquery-ui-tab-header {
+  margin:0px !important;
+}
+div#products_details_others_tab ul.jquery-ui-tab-header li {
+  list-style-image: none !important;
+  margin-bottom: -1px !important;
+}
+
+.pwcs_productdeatils_options_main .ajax_status {
+  margin-left:10px;
+  font-weight:bold;
+  clear:both; 
+  padding: 5px;
+}
+
+.pwcs_productdeatils_options_main .each_option {
+  margin:5px 0;
+  clear: both;
+}
+
+.pwcs_productdeatils_options_main .option_buttons
+{
+  clear: both; 
+  margin-top: 10px; 
+  text-align: center;
+}
+
+/***** Start related products >> *****/
+#pwcs_related_product_block .product_box_class {
+  width: 102px;
+  border: 1px solid #ddd;
+  margin: 3px;
+}
+/***** End related products >> *****/
+
+
+/***** Start Manufacturer page *****/
+.pwcs_single_manufacturer_view_item {
+  border: 1px solid #DDDDDD;
+  float: left;
+  margin: 3px;
+  padding: 10px;
+  width: 28%;
+  height: 35px;
+}
+
+.pwcs_single_manufacturer_view_item .pwcs_smvi_name {
+  float: left;
+  font-size: 1.3em;
+  height: 100%;
+  line-height: 1.2em;
+  width: 70%;
+}
+
+.pwcs_single_manufacturer_view_item .pwcs_smvi_amount {
+  float: right;
+  font-size: 2.5em;
+  height: 100%;
+  line-height: 100%;
+  margin-top: 3px;
+  text-align: right;
+  width: 28%;
+}
+
+/***** End Manufacturer page *****/
+
+
+/**** Search ****/
+.pwcs_sitesearch_form_div form .form-item{
+  display: inline;
+  height: auto;
+  margin: 0;
+  padding: 0 10px 0 0;
+}
+.pwcs_sitesearch_form_div form .form-item label {
+  display:inline;
+  padding:0 10px 0 0;
+}
+#block-pwcs-sitesearch_input .pwcs_sitesearch_form_div form .form-item label {
+  display:none;
+}
+#block-pwcs-sitesearch_input .pwcs_sitesearch_form_div form .form-item input {
+  width: 175px;
+}
+
+.pwcs-item-preview {
+  border: 1px solid #EEEEEE;
+  height: 300px;
+  margin: 10px 0;
+  overflow: auto;
+  padding: 2px;
+  width: 950px;
+}
+
+.pwcs-tagcloud-link {
+  display: inline-block;
+  padding: 2px 3px;
+}
+.product_hidden{
+  color:#ff0000;
+}
+
+.formitem_inline .form-item,
+.formitem_inline .form-item label,
+.formitem_inline .form-item input {
+  display: inline;
+}
+
+.formitem_inline form {
+  margin:0 !important;
+}
+
+/** Header Banner BLOCK CSS**/
+
+.pwcs-header-banner {
+  position:relative;
+  text-align:center;
+}
+.pwcs-header-banner .banner-text {
+  left: 0;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  text-align:left;
+}
+
+.customer_review_summary {
+  border-bottom: 1px solid #DDDDDD;
+  margin-bottom: 15px;
+  padding: 10px;
+}
+.customer_review_summary .total_text {
+  float:left;
+  width: 200px;
+  font-weight: bold;
+}
+.customer_review_summary .total_text .total {
+  font-size: 2em;
+}
+.customer_review_summary .average_rating {
+  float:left;
+  width: 100px;
+  font-weight: bold;
+}
+.customer_review_summary .productreview_addnew_span {
+  float:right;
+  padding-top: 3px;
+}
+
+
+.review_box {
+  margin-bottom: 10px;
+}
+.review_box h2.review_subject{
+  font-size: 1.3em;
+}
+.review_box p.review_submittedby{
+  margin: 5px 0;
+  font-weight: bold;
+}
+.review_box p.review_comment{
+  margin: 5px 0;
+}
+
+.price_strike_through {
+  text-decoration: line-through;
+  color: red;
+}
+
+/*.container  {
+  background-color:#fefefe;
+  border: 1px solid #eee;
+  height:1500px;
+  padding:12px;
+  width:980px;
+  margin: 50px auto;
+}
+*/
+.pwcs_table .droppable, .pwcs_table .droppable2, .pwcs_table .droppable3, .pwcs_table .droppable4, .pwcs_table .droppable5, .pwcs_table .droppable6, .pwcs_table .droppable7 {
+  width: 60px;
+  height: 75px;
+  padding: 5px;
+  float: left;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  margin-left: 2px;
+  margin-right: 2px;
+  background-color: #ffd;
+  border:1px dashed #999;
+}
+/*
+.draggable-picname{
+  color:#0000FF;
+  font-weight:bold;  
+}
+*/
+.product-picture-filename{
+  color:#0000FF;
+  font-weight:bold;
+  font-size:10px;  
+}
+.product-trash-area{
+  height:6px;
+  text-align:center;  
+}
+.image_div .draggable {
+  width: 75px;
+  height: 75px;
+  padding: 5px;
+  float: left;
+  margin: 10px 10px 10px 0; 
+  background-color: #d5eca6;
+  border:1px dotted #b36;
+  font-weight: bold;
+  text-align: center;
+  cursor:move;
+}
+.dragactive{
+  background-color: #ffcccc;
+  border: 1px dashed #e5a8a8;
+}
+.drophover{
+  background-color: #d5eca6;
+  border: 1px dotted #c7dd9b;
+}
+.drophighlight{
+  background-color: #cae9ec;
+  border: 1px solid #b9d5d8;
+}
+#image_div2 {
+  position:absolute;  
+  width:140px;
+  top:10px;
+  right:10px;  
+  padding:16px;
+  background:#FFFFFF;  
+  border:2px solid #2266AA;  
+  z-index:100
+}
+.cartlinkblock {
+  text-align:right;
+}
+.product_videos_each {
+  display:inline-block;
+  padding: 5px;
+  text-align: center;
+}
+
+#pwcs_image_slideshow {
+  overflow:hidden;
+}
+#pwcs_image_slideshow ul {
+  margin:0;
+  padding:0;
+}
+
+/* Scocial Media
+------------------------------*/
+#block-pwcs-socialmedia {
+  margin: 0;
+}
+#pwcs_socialmedia {
+  
+}
+#pwcs_socialmedia ul.socialmedialinks {
+  margin: 0;
+}
+#pwcs_socialmedia ul.socialmedialinks li {
+  display: inline-block;
+  list-style: none outside none;
+  margin: 1px;
+}
+#pwcs_socialmedia ul.socialmedialinks li a {
+  background-image: url("../images/social-media-icons.png");
+  background-repeat: no-repeat;
+  background-color: transparent;
+  display: block;
+  height: 35px;
+  text-indent: -99999px;
+  width: 35px;
+  outline:none;
+}
+
+#pwcs_socialmedia ul.socialmedialinks li.facebook a {
+  background-position: 0 0;
+}
+#pwcs_socialmedia ul.socialmedialinks li.facebook a:hover {
+  background-position: -35px 0;
+}
+
+#pwcs_socialmedia ul.socialmedialinks li.linkedin a {
+  background-position: 0 -35px;
+}
+#pwcs_socialmedia ul.socialmedialinks li.linkedin a:hover {
+  background-position: -35px -35px;
+}
+
+#pwcs_socialmedia ul.socialmedialinks li.twitter a {
+  background-position: 0 -70px;
+}
+#pwcs_socialmedia ul.socialmedialinks li.twitter a:hover {
+  background-position: -35px -70px;
+}
+
+#pwcs_socialmedia ul.socialmedialinks li.youtube a {
+  background-position: 0 -105px;
+}
+#pwcs_socialmedia ul.socialmedialinks li.youtube a:hover {
+  background-position: -35px -105px;
+}
+
+/* Lightbox Hack */
+#lightbox #imageData #caption {
+  font-size: 13px;
+}
+#lightbox #imageData #imageDetails {
+  padding-top: 8px;
+}
+#lightbox iframe#lightboxFrame {
+  border:none;
+}
+
+.product_additional_images {
+  padding-top: 5px;
+}
+  
+/*
+#product_details .product-defaultimage img {
+  height: auto;
+  width: 235px;
+}
+#product_details .product_additional_images img {
+  height: 60px;
+  width: 60px;
+}
+*/

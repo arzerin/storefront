@@ -1,0 +1,751 @@
+/* $Id: pwcs_siteadmin.css,v 1.6.2.1 2011/02/20 rasel kabir Exp $ */
+
+.toggle-featured{
+  outline-style:none;
+}
+  
+.pwcs-checkbox-checked{
+  height: 24px;
+  width: 24px;
+  margin:auto;
+  background: transparent url(../images/checkbox.png) 50% 0% no-repeat !important;
+}
+
+.pwcs-checkbox-notchecked{
+  height: 24px;
+  width: 24px;
+  margin:auto;
+  background: transparent url(../images/checkbox.png) 50% 100% no-repeat !important;
+}
+
+
+ul.pwcs-siteadminnav{
+  margin-top: 10px !important;
+  padding: 5px 0 !important;
+}
+
+.pwcs_quickview_yes {
+  background: transparent url(../images/pwcs_quickview_yes.png) 50% 50% no-repeat !important;
+  height: 16px;
+  width: 16px;
+}
+
+.pwcs_quickview_no {
+  background: transparent url(../images/pwcs_quickview_no.png) 50% 50% no-repeat !important;
+  height: 16px;
+  width: 16px;
+}
+
+#pwcs_manufacturer_setfeatured_form_featured_checkboxes .form-checkboxes .form-item {
+  float:left;
+  width: 25%;
+}
+
+/*** Edit product >> **/
+#product_related_products_selection .form-checkboxes .form-item{
+  float:left;
+  width: 130px;
+  border: 1px solid #ddd;
+  margin: 3px;
+  height: 220px;
+}
+
+#product_image_selection .form-radios .form-item{
+  border:1px solid #DDDDDD;
+  float:left;
+  height:100px;
+  margin:2px;
+  overflow:hidden;
+  padding:3px;
+  position:relative;
+  text-align:center;
+  width:100px;
+}
+
+#product_image_selection .form-radios .form-item input{
+  bottom:5px;
+  left:5px;
+  margin:0;
+  padding:0;
+  position:absolute;
+}
+
+.pwcs-item-selected {
+  background-color: #DAEBF1;
+  border: 1px solid #23819F !important;
+/*  font-weight: bold !important;
+  padding: 4px 6px 1px 0;*/
+}
+
+#pwcs_add_edit_products .node-form {
+  position: relative;
+}
+
+.add_edit_products_buttons {
+  position: absolute;
+  right: 15px;
+  top: 45px;
+}
+
+.add_edit_products_buttons input {
+  padding: 2px 8px;
+}
+
+#pwcs_add_edit_products .ui-tabs-panel{
+  margin-top: 50px;
+  border-top: 1px solid #ddd;
+}
+#pwcs_add_edit_products .ui-tabs .ui-tabs-nav li.ui-tabs-selected {
+  padding-bottom: 0px;
+}
+/* filter form */
+/*
+#pwcs-siteadmin-products-filter-form{
+  margin: 0 !important;
+  padding: 10px;
+}
+#pwcs-siteadmin-products-filter-form .form-item {
+  clear: both;
+  float: none;
+  margin: 0;
+  padding: 5px;
+}
+#pwcs-siteadmin-products-filter-form .form-item .form-item {
+  margin: 0;
+  padding: 0;
+}
+#pwcs-siteadmin-products-filter-form .form-item label{
+  float:left;
+  width: 150px;
+}
+#pwcs-siteadmin-products-filter-form .form-item .form-item label{
+  float:none;
+  width: auto;
+}
+#pwcs-siteadmin-products-filter-form .form-item .form-checkboxes {
+  float:left;
+}
+#pwcs-siteadmin-products-filter-form .form-item input{
+
+}
+.button-container{
+  margin:5px;
+  padding:0;
+  text-align:center;
+}
+#pwcs_product_list_filter_box {
+  border: 1px solid #E8F5FA;
+}
+*/
+/*** << Edit product **/
+
+/* Filter form 
+----------------------*/
+.list-filter-form {
+  border: 1px solid #E8F5FA;
+}
+.list-filter-form form {
+  margin:10px;
+}
+.list-filter-form .form-item {
+  display: inline-block;
+  width: 48%;
+  margin: 0;
+}
+.list-filter-form .form-item  .form-item {
+  display:inline-block;
+  width: auto;
+}
+.list-filter-form .form-item label {
+  display:inline-block;
+  width: 30%;
+}
+.list-filter-form .form-item .form-item label {
+  width:auto;
+}
+.list-filter-form .form-item .form-checkboxes {
+  display:inline-block;
+  width: 60%;
+}
+.list-filter-form .form-item input, 
+.list-filter-form .form-item select, 
+.list-filter-form .form-item textarea{
+  display:inline-block;
+  width: 60%;
+}
+.list-filter-form .form-item .form-item input, 
+.list-filter-form .form-item .form-item select, 
+.list-filter-form .form-item .form-item textarea{
+  display:inline-block;
+  width: 60%;
+}
+.list-filter-form .form-item input.form-checkbox {
+  width:auto;
+}
+
+.list-filter-form .button-container {
+  border-top: 1px solid #DDDDDD;
+  margin: 15px 0 0;
+  padding: 5px 0;
+  text-align: center;
+}
+
+/*** START Product Single View Admin CSS ***/
+#pwcs_psv_options .form-radios .form-item{
+  border-bottom: 1px solid #CCCCCC;
+  margin: 5px 0;
+  overflow: hidden;
+  padding: 5px;
+  position: relative;
+  width: auto;
+}
+#pwcs_psv_options .psv_view{
+
+}
+#pwcs_psv_options .form-radios .form-item label.option input {
+  left: 10px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 7px;
+}
+#pwcs_psv_options .admin_psv_options{
+
+}
+#pwcs_psv_options .option_title_details {
+  padding: 0 0 0 30px;
+}
+#pwcs_psv_options .option_title_details .title {
+  font-weight: bold;
+}
+.showhidelink {
+  font-size: 0.8em;
+}
+#pwcs_psv_options .preview_image {
+  position: absolute;
+  right: 20px;
+  top: 0;
+}
+
+/*** END Product Single View Admin CSS ***/
+
+.siteadmin-floating-navigation {
+  position: fixed;
+  top: 10px;
+  left: 0;
+}
+
+.siteadmin-floating-navigation .bg-top {
+  background: url("../images/siteadmin-floating-nav-bg-top.png") no-repeat scroll 0 0 transparent;
+  height: 17px;
+  width: 140px;
+}
+.siteadmin-floating-navigation .bg-mid {
+  background: url("../images/siteadmin-floating-nav-bg-mid.png") repeat-y scroll 0 0 transparent;
+  width: 140px;
+  display: inline-block;
+}
+
+.siteadmin-floating-navigation .bg-bottom {
+  background: url("../images/siteadmin-floating-nav-bg-bottom.png") no-repeat scroll 0 100% transparent;
+  height: 17px;
+  width: 140px;
+}
+.siteadmin-floating-navigation a {
+  display: block;
+  height: 16px;
+  line-height: 16px;
+  margin: 10px;
+  padding-left: 20px;
+  text-align: left;
+  text-decoration: none !important;
+  color:#000;
+  border: 1px solid #FFF;
+}
+.siteadmin-floating-navigation a:hover {
+  background-color: #4492da !important;
+  border: 1px solid #4492da;
+  color:#FFF;
+}
+.siteadmin-floating-navigation a.return {
+  background: url("../images/return.png") no-repeat scroll 0 0;
+}
+
+.siteadmin-floating-navigation a.addblock {
+  background: url("../images/add-block.png") no-repeat scroll 0 0;
+}
+
+/*** system-theme-settings ***/
+
+#system-theme-settings .form-item label{
+  float:left;
+  width: 32%;
+}
+
+#system-theme-settings .form-radios{
+  float:left;
+}
+
+
+#system-theme-settings .form-radios .form-item label{
+  float:none;
+  width: auto;
+}
+
+#system-theme-settings #theme_grid_config .form-item label {
+  float:left;
+  width: 50%;
+}
+
+#system-theme-settings #colorsettings .form-item {
+  clear:both;
+}
+#system-theme-settings #colorsettings .form-item label {
+  float:left;
+  width: 40%;
+}
+
+#system-theme-settings #edit-customcss-wrapper label
+{
+  float:none;
+  width: 100%;
+}
+
+#system-theme-settings .colorsettings .form-item .description {
+  float:right;
+  width: 30%;
+}
+
+/*
+#system-theme-settings #colorsettings .form-item .description {
+  float:right;
+  width: 40%;
+}
+*/
+
+
+#pwcs_videos_list_filter {
+  text-align:right;
+  margin:10px 5px;
+}
+
+.pwcs_video_list_count{
+  float:right; 
+  width:auto; 
+  margin:5px 5px;
+}
+
+#block-admin-display-form {
+  padding: 5px;
+  border: 2px solid #AAA;
+}
+
+.content-inner h1.title {
+  margin: 0;
+  padding:0;
+}
+
+
+.radios-inline .form-radios .form-item{
+  display: inline-block;
+  margin: 0 10px;
+  padding: 2px;
+  position: relative;
+  text-align: center;
+}
+
+.radios-inline .form-radios .form-item input{
+  margin: 0;
+  vertical-align: middle;
+}
+
+.ui-tabs-nav
+{
+  margin:0 !important;
+}
+
+/******* SITEADMIN HOMEPAGE *******/
+
+.siteadmin_dashboard {
+/*  -moz-box-shadow: 0 0 5px 0 #ddd; */
+/*  -webkit-box-shadow: 0 0 5px 0 #ddd; */
+  margin: 15px 0;
+}
+
+.siteadmin_dashboard .sd_item {
+  float: left;
+  width: auto;
+}
+.siteadmin_dashboard .sd_item a{
+  background: url("../images/dashboard/button-bg.png") no-repeat scroll 0 0 transparent;
+  display: block;
+  height: 83px;
+  margin: 12px 16px;
+  text-decoration: none;
+  width: 267px;
+  box-shadow: 0 0 5px 0 #DDDDDD;
+}
+.siteadmin_dashboard .sd_item a:hover{
+  background-position: 0 100%;
+  text-decoration:none;
+  box-shadow: 0 0 5px 0 #999999;
+}
+.siteadmin_dashboard .sd_item a.pwcs-comingsoon:hover {
+  background-position: 0 0;
+  text-decoration:none;
+  box-shadow: 0 0 5px 0 #DDDDDD;
+}
+/*
+.siteadmin_dashboard .sd_item a.pwcs-comingsoon .sd_item_inner .comingsoon{
+  color: red;
+  font-family: "Myriad Pro";
+  font-size: 12px;
+}
+*/
+.siteadmin_dashboard .sd_item_inner {
+  height: 100%;
+}
+.siteadmin_dashboard .sd_item_inner:hover {
+
+}
+.siteadmin_dashboard a.pwcs-comingsoon:hover .sd_item_inner:after {
+  content: "Coming Soon..";
+  color: red;
+  font-family: "Myriad Pro";
+  font-size: 12px;
+}
+.siteadmin_dashboard .sd_item_inner .image {
+  float:left;
+}
+
+.siteadmin_dashboard .sd_item_inner .text{
+  color: #29567E;
+  font-family: "Myriad Pro";
+  font-size: 18px;
+  line-height: 25px;
+  /*padding-right: 55px;*/
+  /*padding-top: 27px;*/
+}
+
+/*My Orders*/
+.siteadmin_dashboard .sd_item_inner .image.myorders {
+  background: url("../images/dashboard/myorders.png") no-repeat scroll 0 0 transparent;
+  height: 45px;
+  width: 53px;
+  margin: 20px 15px 0 16px;
+}
+/*My Products*/
+.siteadmin_dashboard .sd_item_inner .image.myproducts {
+  background: url("../images/dashboard/myproducts.png") no-repeat scroll 0 0 transparent;
+  height: 58px;
+  width: 66px;
+  margin: 12px 3px 0 15px;
+}
+/*Fulfillment*/
+.siteadmin_dashboard .sd_item_inner .image.fulfillment {
+  background: url("../images/dashboard/fulfillment.png") no-repeat scroll 0 0 transparent;
+  height: 67px;
+  margin: 12px 7px 0 15px;
+  width: 75px;
+}
+/*Page Builder*/
+.siteadmin_dashboard .sd_item_inner .image.pagebuilder {
+  background: url("../images/dashboard/pagebuilder.png") no-repeat scroll 0 0 transparent;
+  height: 72px;
+  margin: 10px 1px 0 15px;
+  width: 65px;
+}
+/*Media Manager*/
+.siteadmin_dashboard .sd_item_inner .image.mediamanager {
+  background: url("../images/dashboard/mediamanager.png") no-repeat scroll 0 0 transparent;
+  height: 57px;
+  margin: 19px 3px 0 10px;
+  width: 64px;
+}
+/*Drag & Drop*/
+.siteadmin_dashboard .sd_item_inner .image.dragdrop {
+  background: url("../images/dashboard/dragdrop.png") no-repeat scroll 0 0 transparent;
+  height: 70px;
+  margin: 11px 0 0 15px;
+  width: 80px;
+}
+/*CRM*/
+.siteadmin_dashboard .sd_item_inner .image.crm {
+  background: url("../images/dashboard/crm.png") no-repeat scroll 0 0 transparent;
+  height: 66px;
+  margin: 11px 0 0 15px;
+  width: 63px;
+}
+/*Project Manager*/
+.siteadmin_dashboard .sd_item_inner .image.projectmanager {
+  background: url("../images/dashboard/projectmanager.png") no-repeat scroll 0 0 transparent;
+  height: 52px;
+  margin: 18px 0 0 10px;
+  width: 65px;
+}
+/*Product Review*/
+.siteadmin_dashboard .sd_item_inner .image.productreview {
+  background: url("../images/dashboard/productreview.png") no-repeat scroll 0 0 transparent;
+  height: 65px;
+  margin: 12px 5px 0 13px;
+  width: 64px;
+}
+
+/*Customer Tickets*/
+.siteadmin_dashboard .sd_item_inner .image.customertickets {
+  background: url("../images/dashboard/customertickets.png") no-repeat scroll 0 0 transparent;
+  height: 35px;
+  margin: 25px 3px 0 15px;
+  width: 50px;
+}
+/*Live Chat*/
+.siteadmin_dashboard .sd_item_inner .image.livechat-clicktocall {
+  background: url("../images/dashboard/livechat.png") no-repeat scroll 0 0 transparent;
+  height: 39px;
+  margin: 15px 3px 0 10px;
+  width: 50px;
+}
+/*Click to Call*/
+.siteadmin_dashboard .sd_item.livechat-clicktocall .sd_item_inner {
+  background: url("../images/dashboard/clicktocall.png") no-repeat scroll 157px 36px transparent;
+  height: 100%;
+}
+/*Suggest a Feature*/
+.siteadmin_dashboard .sd_item_inner .image.suggestafeature-bugspotter {
+  background: url("../images/dashboard/suggestafeature.png") no-repeat scroll 0 0 transparent;
+  height: 40px;
+  margin: 11px 7px 0 15px;
+  width: 33px;
+}
+/*Bug Spotter*/
+.siteadmin_dashboard .sd_item.suggestafeature-bugspotter .sd_item_inner {
+  background: url("../images/dashboard/bugspotter.png") no-repeat scroll 152px 40px transparent;
+  height: 100%;
+}
+/*Manufacturer*/
+.siteadmin_dashboard .sd_item_inner .image.manufacturer {
+  background: url("../images/dashboard/manufacturer.png") no-repeat scroll 0 0 transparent;
+  height: 74px;
+  margin: 9px 0 0 13px;
+  width: 74px;
+}
+/*Social Media*/
+.siteadmin_dashboard .sd_item_inner .image.socialmedia {
+  background: url("../images/dashboard/socialmedia.png") no-repeat scroll 0 0 transparent;
+  height: 63px;
+  margin: 15px 5px 0 15px;
+  width: 72px;
+}
+/*Affiliates*/
+.siteadmin_dashboard .sd_item_inner .image.affiliates {
+  background: url("../images/dashboard/affiliates.png") no-repeat scroll 0 0 transparent;
+  height: 42px;
+  margin: 22px 20px 0 25px;
+  width: 43px;
+}
+/*Buyer Rewards*/
+.siteadmin_dashboard .sd_item_inner .image.buyerrewards {
+  background: url("../images/dashboard/buyerrewards.png") no-repeat scroll 0 0 transparent;
+  height: 73px;
+  margin: 10px 0 0 12px;
+  width: 71px;
+}
+/*Gift Certificates*/
+.siteadmin_dashboard .sd_item_inner .image.giftcertificates {
+  background: url("../images/dashboard/giftcertificates.png") no-repeat scroll 0 0 transparent;
+  height: 63px;
+  margin: 12px 12px 0 15px;
+  width: 47px;
+}
+/*Coupons*/
+.siteadmin_dashboard .sd_item_inner .image.coupons {
+  background: url("../images/dashboard/coupons.png") no-repeat scroll 0 0 transparent;
+  height: 64px;
+  margin: 12px 8px 0 15px;
+  width: 70px;
+}
+/**/
+.siteadmin_dashboard .sd_item_inner .image.storereports {
+  background: url("../images/dashboard/storereports.png") no-repeat scroll 0 0 transparent;
+  height: 65px;
+  margin: 12px 1px 0 15px;
+  width: 64px;
+}
+/**/
+.siteadmin_dashboard .sd_item_inner .image.cartreports {
+  background: url("../images/dashboard/cartreports.png") no-repeat scroll 0 0 transparent;
+  height: 47px;
+  margin: 21px 12px 0 22px;
+  width: 53px;
+}
+/**/
+.siteadmin_dashboard .sd_item_inner .image.surveys {
+  background: url("../images/dashboard/surveys.png") no-repeat scroll 0 0 transparent;
+  height: 63px;
+  margin: 12px 11px 0 28px;
+  width: 59px;
+}
+
+/* Site admin product drag and drop image
+----------------------------------------------------*/
+/*
+.product-image-dragdrop #image_div {
+  float:right; 
+  padding-left:5px;
+  padding-top:0px;
+  overflow:scroll; 
+  padding-right:0px;
+  width:110px;
+  overflow-x: hidden;
+  background:#FFFFFF;
+  height:800px; 
+  border:2px solid #2266AA;
+  top:10px;
+  z-index:100;
+}
+*/
+body#pid-siteadmin-products-draganddropimages{
+  margin-bottom:155px;
+}
+.siteadmin-productimage-dragdrop-images .filter-input {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images-container {
+  bottom: -1px;
+  margin-top: 15px;
+  position: fixed;
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images-prefix {
+  background: url("../images/dd-images-shade-l.png") no-repeat scroll 0 0 transparent;
+  float: left;
+  height: 162px;
+  width: 27px;
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images {
+		/*background-color:#FBFDFF*/
+  /*border: 1px solid #509BCB;*/
+  background: url("../images/dd-images-shade-m.png") repeat scroll 0 0 transparent;
+  float: left;
+  height: 162px;
+  overflow: auto;
+  width: 845px;
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images-suffix {
+  background: url("../images/dd-images-shade-r.png") no-repeat scroll 0 0 transparent;
+  float: left;
+  height: 162px;
+  width: 27px;
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images p.title {
+  border-bottom: 1px solid #DDD;
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  width: auto;
+  margin: 0
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images #image_div {
+  margin-top: 50px;
+  width: 30000px;
+}
+.product-image-dragdrop .siteadmin-productimage-dragdrop-images .draggable {
+  border: 1px solid #BBBBBB;
+  display: inline-block;
+  height: 70px;
+  margin: 0 3px;
+  overflow: hidden;
+  padding: 2px;
+  text-align: center;
+  width: 60px;
+  vertical-align: middle;
+}
+
+
+/* siteadmin/theme page CSS
+------------------------------------------------*/
+.pwcs_theme_list {
+  border: 1px solid #DDDDDD;
+  margin: 10px 0;
+}
+
+.pwcs_theme_list p.sub-heading {
+  font-style: italic;
+  margin: 10px;
+}
+
+.pwcs_theme_list_gridview {
+
+}
+.pwcs_theme_list_gridview .themelist_gridview_each {
+  float: left;
+  width: 25%;
+  position: relative;
+  text-align: center;
+}
+.pwcs_theme_list_gridview .themelist_gridview_each_inner {
+  border: 1px solid #BBBBBB;
+  height: 225px;
+  margin: 10px;
+  padding: 20px;
+}
+.pwcs_theme_list_gridview .themelist_gridview_each_inner:hover {
+  border: 1px solid #999999;
+}
+.pwcs_theme_list_gridview .name {
+  font-size: 13px;
+  font-weight: bold;
+  padding: 8px 0;
+}
+.pwcs_theme_list_gridview .description {
+  font-size: 11px;
+}
+.pwcs_theme_list_gridview .themelist_gridview_each .buttons {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+}
+
+/* current */
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme {
+  position: relative;
+}
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme_inner {
+  /*background-color: #DBF1FF;
+  border: 1px solid #5EB2F9;*/
+  border: 1px solid #999999;  
+  margin: 10px;
+  padding: 15px;
+}
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme .screenshot {
+  float: left;
+  width: auto;
+  margin-right: 10px;
+}
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme .name {
+  font-size: 15px;
+  text-decoration: underline;
+}
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme .description {
+  font-size: 12px;
+}
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme .buttons {
+  bottom: 20px;
+  position: absolute;
+  right: 30px;
+}
+.pwcs_theme_list_gridview .themelist_gridview_currenttheme .current_item {
+  border-right: medium none;
+  padding: 5px 20px;
+  position: absolute;
+  right: 11px;
+  top: 15px;
+}
+
+/* Lightbox Hack */
+#pid-siteadmin-theme #lightbox {
+  top: 20px !important;
+  position: fixed !important;
+}
+

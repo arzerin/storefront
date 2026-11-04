@@ -21,7 +21,7 @@ class CreateCashOnDeliveryOrder
                 throw ValidationException::withMessages(['cart' => 'Your cart is empty. Add a product before checking out.']);
             }
 
-            $total = $items->sum(fn ($item) => (int) $item->product->price->getAmount() * $item->quantity);
+            $total = $items->sum(fn ($item) => $item->product->unitPriceCentsForQuantity($item->quantity) * $item->quantity);
             $address = [
                 'name' => $details['shipping_name'],
                 'phone' => $details['phone'],
@@ -48,7 +48,7 @@ class CreateCashOnDeliveryOrder
             ]);
 
             foreach ($items as $item) {
-                $price = (int) $item->product->price->getAmount();
+                $price = $item->product->unitPriceCentsForQuantity($item->quantity);
                 $order->items()->create([
                     'product_variant_id' => $item->product_variant_id,
                     'name' => $item->product->name,

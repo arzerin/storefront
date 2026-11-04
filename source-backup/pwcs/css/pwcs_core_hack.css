@@ -1,0 +1,5 @@
+/* $Id: pwcs_core_hack.css,v 1.0 2011/03/27 rasel kabir Exp $ */
+
+#content-tabs #content-tabs-inner ul.secondary {
+	display:none;
+}

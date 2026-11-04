@@ -6,7 +6,8 @@ This map reflects the current `main` branch. Check the live route registry with 
 
 | Method and path | Route name | Entry point and function | View or result | Access |
 | --- | --- | --- | --- | --- |
-| `GET /` | `home` | `App\Livewire\StoreFront::render()`; `products()`, `categories()`, `colors()`, `sizes()`, `suggestions()`, and `recentlyViewed()` supply data | `livewire.store-front` | Public |
+| `GET /` | `home` | `App\Livewire\StoreFront::render()`; `products()`, `categories()`, `manufacturerOptions()`, `colors()`, `sizes()`, `suggestions()`, and `recentlyViewed()` supply data | `livewire.store-front` | Public |
+| `GET /collections/{collection:slug}` | `collection.show` | Closure in `routes/web.php` validates publication and redirects to the filtered storefront | `/?collection={slug}#collection` | Public; hidden collections return 404 |
 | `GET /dashboard` | `dashboard` | Laravel redirect route | Redirects to `/` | Public |
 | `GET /products/{product}` | `product.show` | `App\Livewire\ShowProduct::mount()` and `render()` | `livewire.product` | Public; unpublished products return 404 |
 | `GET /cart` | `cart.show` | `App\Livewire\ShowCart::render()` | `livewire.show-cart` | Public; `CartFactory::make()` finds the session or customer cart |
@@ -24,7 +25,7 @@ The customer checkout group uses `auth:sanctum`, Jetstream's authenticated-sessi
 
 | Page | User action | Function and next step |
 | --- | --- | --- |
-| Storefront | Search, filter, sort, clear filters | `StoreFront::updated()`, `setCategory()`, `clearFilters()`, then `products()` reruns the catalogue query |
+| Storefront | Search, filter by category/manufacturer/color/size, sort, clear filters | `StoreFront::updated()`, `setCategory()`, `clearFilters()`, then `products()` reruns the catalogue query; multiple checked manufacturers use OR, combined with other filters using AND |
 | Product | Choose a color | `ShowProduct::selectColor()` updates available sizes and color-tagged `galleryImages()`, then dispatches `product-color-changed` to swap the main image |
 | Product | Add to bag | `ShowProduct::addToCart()` validates the selected variant and calls `AddProductVariantToCart::add()` |
 | Bag | Change quantity, remove, add recommendation | `ShowCart::increment()`, `decrement()`, `deleteItem()`, or `addRecommendation()`; the last calls `AddProductVariantToCart::add()` |
@@ -32,11 +33,11 @@ The customer checkout group uses `auth:sanctum`, Jetstream's authenticated-sessi
 | Checkout | Submit card payment | `Checkout::submit()` calls `CreateStripeCheckoutSession::createFromCart()` and redirects to Stripe Checkout |
 | Checkout | Submit cash on delivery | `Checkout::submit()` calls `CreateCashOnDeliveryOrder::handle()`, creates the order, clears the bag, and redirects to `order.show` |
 
-The `Product::imageForColor()` model method supplies the matching image in the bag and checkout summary. The `images.color` column associates photos with variant colors; untagged photos are shared fallback images.
+The `Product::imageForColor()` model method supplies the matching image in the bag and checkout summary. The `images.color` column associates photos with variant colors; untagged photos are shared fallback images. `Product::unitPriceCentsForQuantity()` supplies the same sale and quantity-tier price to the product page, bag, COD order, and Stripe Checkout. The highest qualifying tier applies per cart line; percentage and amount tiers discount the active sale price, while a fixed unit price is capped at that base price. Unit prices have a $0.01 floor. `sale_only` pauses quantity tiers while a sale is active.
 
 ## Admin routes
 
-Admin authentication uses the separate `admins` table, `App\Models\Admin`, and the `admin` session guard in `config/auth.php`. `EnsureAdminAuthenticated` protects the product routes and redirects guests to `/admin/login`. Customer sign-in alone does not grant admin access.
+Admin authentication uses the separate `admins` table, `App\Models\Admin`, and the `admin` session guard in `config/auth.php`. `EnsureAdminAuthenticated` protects the catalogue routes and redirects guests to `/admin/login`. Customer sign-in alone does not grant admin access.
 
 | Method and path | Route name | Function | View or result |
 | --- | --- | --- | --- |
@@ -44,13 +45,28 @@ Admin authentication uses the separate `admins` table, `App\Models\Admin`, and t
 | `POST /admin/login` | `admin.login.submit` | `Admin\AuthController::login()` | Authenticates with the `admin` guard and redirects to the intended admin page; limited to 5 attempts per minute |
 | `GET /admin` | `admin.dashboard` | Protected Laravel redirect route | Redirects to `/admin/products` |
 | `POST /admin/logout` | `admin.logout` | `Admin\AuthController::logout()` | Signs out the admin session and redirects to admin login |
+| `GET /admin/categories` | `admin.categories.index` | `Admin\CategoryController::index()` | `admin.categories.index`; lists categories and product counts, with a creation form |
+| `POST /admin/categories` | `admin.categories.store` | `Admin\CategoryController::store()` | Creates a unique category and redirects to the list |
+| `GET /admin/categories/{category}/edit` | `admin.categories.edit` | `Admin\CategoryController::edit()` | `admin.categories.edit` |
+| `PUT /admin/categories/{category}` | `admin.categories.update` | `Admin\CategoryController::update()` | Renames the category and updates associated products |
+| `GET /admin/collections` | `admin.collections.index` | `Admin\CollectionController::index()` | Lists collections and product counts |
+| `GET /admin/collections/create` | `admin.collections.create` | `Admin\CollectionController::create()` | Collection editor |
+| `POST /admin/collections` | `admin.collections.store` | `Admin\CollectionController::store()` | Creates a curated collection and assigns products |
+| `GET /admin/collections/{collection}/edit` | `admin.collections.edit` | `Admin\CollectionController::edit()` | Collection editor |
+| `PUT /admin/collections/{collection}` | `admin.collections.update` | `Admin\CollectionController::update()` | Updates collection details, publication, and product selection |
+| `GET /admin/manufacturers` | `admin.manufacturers.index` | `Admin\ManufacturerController::index()` | Lists makers and their product counts |
+| `GET /admin/manufacturers/create` | `admin.manufacturers.create` | `Admin\ManufacturerController::create()` | Manufacturer editor |
+| `POST /admin/manufacturers` | `admin.manufacturers.store` | `Admin\ManufacturerController::store()` | Creates a manufacturer |
+| `GET /admin/manufacturers/{manufacturer}/edit` | `admin.manufacturers.edit` | `Admin\ManufacturerController::edit()` | Manufacturer editor |
+| `PUT /admin/manufacturers/{manufacturer}` | `admin.manufacturers.update` | `Admin\ManufacturerController::update()` | Updates the manufacturer's name and description |
+| `DELETE /admin/manufacturers/{manufacturer}` | `admin.manufacturers.destroy` | `Admin\ManufacturerController::destroy()` | Removes the manufacturer; products remain and become unassigned |
 | `GET /admin/products` | `admin.products.index` | `Admin\ProductController::index()` | `admin.products.index`; searchable, paginated list |
 | `GET /admin/products/create` | `admin.products.create` | `Admin\ProductController::create()` | `admin.products.form` in create mode |
 | `POST /admin/products` | `admin.products.store` | `Admin\ProductController::store()` → private `save()` | Validates, creates product/variants/images, redirects to edit |
 | `GET /admin/products/{product}/edit` | `admin.products.edit` | `Admin\ProductController::edit()` | `admin.products.form` in edit mode |
 | `PUT /admin/products/{product}` | `admin.products.update` | `Admin\ProductController::update()` → private `save()` | Updates name, description, category, price, publication, variants, and images |
 
-AdminLTE styling is isolated in `layouts.admin`, `resources/css/admin.css`, and `resources/js/admin.js`. Product photos are stored on the `public` filesystem disk and served through `public/storage`. The editor refuses to remove a variant already referenced by a bag or order.
+AdminLTE styling is isolated in `layouts.admin`, `resources/css/admin.css`, and `resources/js/admin.js`. Product photos are stored on the `public` filesystem disk and served through `public/storage`. The product form loads category and manufacturer options from their tables and validates the selections. It also stores sale dates, a sale/quantity interaction mode, and quantity discount tiers. The editor refuses to remove a variant already referenced by a bag or order. Collections use a many-to-many product relation and do not change a product's reporting category.
 
 ## Framework routes and events
 
@@ -86,11 +102,33 @@ Fortify, Jetstream, Livewire, Sanctum, and Cashier register these package routes
 ## Main files and data
 
 - Routes: `routes/web.php`, `routes/api.php`, `routes/console.php`.
-- Admin controllers: `app/Http/Controllers/Admin/AuthController.php`, `ProductController.php`.
+- Admin controllers: `app/Http/Controllers/Admin/AuthController.php`, `ProductController.php`, `CategoryController.php`, `CollectionController.php`, `ManufacturerController.php`.
 - Storefront Livewire components: `app/Livewire/StoreFront.php`, `ShowProduct.php`, `ShowCart.php`, `Checkout.php`, `CheckoutStatus.php`, `Myorders.php`, `ShowOrder.php`.
 - Webshop actions: `app/Actions/Webshop/` for cart updates, COD orders, Stripe Checkout, Stripe reconciliation, and session-cart migration.
-- Models: `Product`, `ProductVariant`, `Image`, `Cart`, `CartItem`, `Order`, `OrderItem`, `User`, and `Admin` in `app/Models/`.
-- Core tables: `products`, `product_variants`, `images`, `carts`, `cart_items`, `orders`, `order_items`, `users`, and `admins`. Migrations are in `database/migrations/`.
-- Demo catalogue: `database/seeders/AyraDemoCatalogSeeder.php`.
+- Models: `Product`, `Category`, `Collection`, `Manufacturer`, `QuantityDiscount`, `ProductVariant`, `Image`, `Cart`, `CartItem`, `Order`, `OrderItem`, `User`, and `Admin` in `app/Models/`.
+- Core tables: `products`, `categories`, `collections`, `collection_product`, `manufacturers`, `quantity_discounts`, `product_variants`, `images`, `carts`, `cart_items`, `orders`, `order_items`, `users`, and `admins`. Migrations are in `database/migrations/`.
+- Demo catalogue: `database/seeders/AyraDemoCatalogSeeder.php` calls `AyraExpandedCatalogSeeder.php`, `AyraCollectionsSeeder.php`, and `AyraManufacturersSeeder.php` to create products, curated collections, and sample manufacturer assignments.
 
 For installation and scaffolding commands, see `cmd.md`.
+
+
+## Site content management
+
+| Route | Controller function | Purpose |
+| --- | --- | --- |
+| `GET /admin/site-settings` | `SiteSettingsController@edit` | Edit site name, tagline, hero copy/image and footer copy. |
+| `PUT /admin/site-settings` | `SiteSettingsController@update` | Validate and save site settings; store a replacement hero image on the public disk. |
+| `GET /admin/blocks` | `SiteBlockController@index` | List blocks by placement and display order. |
+| `GET /admin/blocks/create` | `SiteBlockController@create` | Show block form. |
+| `POST /admin/blocks` | `SiteBlockController@store` | Create a block. |
+| `GET /admin/blocks/{block}/edit` | `SiteBlockController@edit` | Show block editor. |
+| `PUT /admin/blocks/{block}` | `SiteBlockController@update` | Update placement, text, order or visibility. |
+| `DELETE /admin/blocks/{block}` | `SiteBlockController@destroy` | Delete a block. |
+| `GET /admin/footer-menu` | `FooterMenuController@index` | List footer links. |
+| `GET /admin/footer-menu/create` | `FooterMenuController@create` | Show footer link form. |
+| `POST /admin/footer-menu` | `FooterMenuController@store` | Create a footer link. |
+| `GET /admin/footer-menu/{item}/edit` | `FooterMenuController@edit` | Show footer link editor. |
+| `PUT /admin/footer-menu/{item}` | `FooterMenuController@update` | Update link, column, audience, order or visibility. |
+| `DELETE /admin/footer-menu/{item}` | `FooterMenuController@destroy` | Delete a footer link. |
+
+`SiteSetting` provides storefront identity, hero and footer text. `SiteBlock` provides visible blocks in the benefits strip, homepage placements and footer. `FooterMenuItem` provides links in Explore, Account and Help footer columns, with optional guest/customer visibility. All admin routes above require `admin.auth`. The homepage renders through `StoreFront` and `resources/views/livewire/store-front.blade.php`; common footer and branding render through `resources/views/layouts/app.blade.php`.

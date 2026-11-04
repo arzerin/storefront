@@ -26,7 +26,7 @@ php artisan queue:work              # separate terminal, when queue jobs are nee
 php artisan schedule:work           # separate terminal, when scheduled jobs are needed
 ```
 
-With Herd, serve the repository through its configured local hostname and run `npm run dev` for asset changes. Use `npm run build` for production assets. `DatabaseSeeder` creates unrelated sample records; use `AyraDemoCatalogSeeder` for the Ayra demo catalogue.
+With Herd, serve the repository through its configured local hostname and run `npm run dev` for asset changes. Use `npm run build` for production assets. `DatabaseSeeder` creates unrelated sample records; use `AyraDemoCatalogSeeder` for the Ayra demo catalogue. It calls `AyraExpandedCatalogSeeder` for additional products, `AyraCollectionsSeeder` for curated collections, and `AyraManufacturersSeeder` for sample manufacturer assignments; rerunning the command is safe.
 
 ## Existing PHP packages and AdminLTE assets
 
@@ -86,12 +86,28 @@ php artisan make:class Actions/Webshop/MigrateSessionCart
 # Listener, seeder, console jobs, and non-Livewire views
 php artisan make:listener StripeEventListener
 php artisan make:seeder AyraDemoCatalogSeeder
+php artisan make:seeder AyraExpandedCatalogSeeder
+php artisan make:seeder AyraCollectionsSeeder
+php artisan make:seeder AyraManufacturersSeeder
+php artisan make:model Category -m
+php artisan make:model Collection -m
+php artisan make:model QuantityDiscount -m
+php artisan make:model Manufacturer -m
+php artisan make:controller Admin/CategoryController
+php artisan make:controller Admin/CollectionController
+php artisan make:controller Admin/ManufacturerController
 php artisan make:command AbandonedCart
 php artisan make:command RemoveInactiveSessionCarts
 php artisan make:view layouts.admin
 php artisan make:view admin.login
 php artisan make:view admin.products.index
 php artisan make:view admin.products.form
+php artisan make:view admin.categories.index
+php artisan make:view admin.categories.edit
+php artisan make:view admin.collections.index
+php artisan make:view admin.collections.form
+php artisan make:view admin.manufacturers.index
+php artisan make:view admin.manufacturers.form
 php artisan make:view checkout.success
 php artisan make:view checkout.cancel
 ```
@@ -128,3 +144,28 @@ php artisan optimize:clear              # when cached configuration/routes need 
 ```
 
 `php artisan migrate:fresh` drops all tables and data; use it only on a disposable test database. Use `php artisan migrate` for a database containing real products, customers, or orders.
+
+
+## Site settings, blocks and footer menu
+
+```bash
+# Generate the site content building blocks (already included in this repository)
+php artisan make:migration create_site_content_tables
+php artisan make:model SiteSetting
+php artisan make:model SiteBlock
+php artisan make:model FooterMenuItem
+php artisan make:controller Admin/SiteSettingsController
+php artisan make:controller Admin/SiteBlockController
+php artisan make:controller Admin/FooterMenuController
+php artisan make:seeder AyraSiteContentSeeder
+
+# Apply schema and load default Ayra content on an existing install
+php artisan migrate
+php artisan db:seed --class=AyraSiteContentSeeder
+php artisan storage:link
+
+# Verify
+php artisan test tests/Feature/SiteContentManagementTest.php
+```
+
+The Blade views were added under `resources/views/admin`, `resources/views/components` and the existing storefront/layout directories; Laravel has no built-in `make:view` command. The seeder uses `firstOrCreate`, so rerunning it keeps content edited in the admin.

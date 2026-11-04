@@ -3,6 +3,7 @@
 use App\Mail\AbandonedCartReminder;
 use App\Mail\OrderConfirmation;
 use App\Models\Order;
+use App\Models\Collection;
 use App\Models\User;
 use App\Livewire\{CheckoutStatus,
     Checkout,
@@ -14,6 +15,12 @@ use App\Livewire\{CheckoutStatus,
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\CollectionController as AdminCollectionController;
+use App\Http\Controllers\Admin\ManufacturerController as AdminManufacturerController;
+use App\Http\Controllers\Admin\SiteSettingsController;
+use App\Http\Controllers\Admin\SiteBlockController;
+use App\Http\Controllers\Admin\FooterMenuController;
 use App\Actions\Webshop\HandleCheckoutSessionCompleted;
 
 //Route::get('preview-email', function() {
@@ -22,6 +29,10 @@ use App\Actions\Webshop\HandleCheckoutSessionCompleted;
 //});
 
 Route::get('/', StoreFront::class)->name('home');
+Route::get('/collections/{collection:slug}', function (Collection $collection) {
+    abort_unless($collection->is_published, 404);
+    return redirect()->route('home', ['collection' => $collection->slug])->withFragment('collection');
+})->name('collection.show');
 Route::redirect('/dashboard', '/')->name('dashboard');
 
 Route::get('/products/{product}', ShowProduct::class)->name('product.show');
@@ -65,6 +76,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin.auth')->group(function () {
         Route::redirect('/', '/admin/products')->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+        Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
+        Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
+        Route::get('/collections', [AdminCollectionController::class, 'index'])->name('collections.index');
+        Route::get('/collections/create', [AdminCollectionController::class, 'create'])->name('collections.create');
+        Route::post('/collections', [AdminCollectionController::class, 'store'])->name('collections.store');
+        Route::get('/collections/{collection}/edit', [AdminCollectionController::class, 'edit'])->name('collections.edit');
+        Route::put('/collections/{collection}', [AdminCollectionController::class, 'update'])->name('collections.update');
+        Route::get('/manufacturers', [AdminManufacturerController::class, 'index'])->name('manufacturers.index');
+        Route::get('/manufacturers/create', [AdminManufacturerController::class, 'create'])->name('manufacturers.create');
+        Route::post('/manufacturers', [AdminManufacturerController::class, 'store'])->name('manufacturers.store');
+        Route::get('/manufacturers/{manufacturer}/edit', [AdminManufacturerController::class, 'edit'])->name('manufacturers.edit');
+        Route::put('/manufacturers/{manufacturer}', [AdminManufacturerController::class, 'update'])->name('manufacturers.update');
+        Route::delete('/manufacturers/{manufacturer}', [AdminManufacturerController::class, 'destroy'])->name('manufacturers.destroy');
+        Route::get('/site-settings', [SiteSettingsController::class, 'edit'])->name('site-settings.edit');
+        Route::put('/site-settings', [SiteSettingsController::class, 'update'])->name('site-settings.update');
+        Route::resource('blocks', SiteBlockController::class)->except('show');
+        Route::resource('footer-menu', FooterMenuController::class)->parameters(['footer-menu' => 'item'])->except('show');
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');

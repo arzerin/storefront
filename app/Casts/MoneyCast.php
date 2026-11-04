@@ -14,8 +14,11 @@ class MoneyCast implements CastsAttributes
      *
      * @param  array<string, mixed>  $attributes
      */
-    public function get(Model $model, string $key, mixed $value, array $attributes): Money
+    public function get(Model $model, string $key, mixed $value, array $attributes): ?Money
     {
+        if ($value === null) {
+            return null;
+        }
         return new Money($value, new Currency('USD'));
     }
 
@@ -26,6 +29,6 @@ class MoneyCast implements CastsAttributes
      */
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed
     {
-        return $value;
+        return $value instanceof Money ? $value->getAmount() : $value;
     }
 }

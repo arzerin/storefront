@@ -1,0 +1,15 @@
+; $Id: pwcs.info,v 1.5.2.1 2008/08/04 06:11:51 rasel kabir Exp $
+name = PWC Store
+description = Premium Web Cart Store.
+dependencies[] = jquery_ui
+dependencies[] = xml_parser
+dependencies[] = imce
+package = PWC
+core = 6.x
+version = "6.x-dev"
+
+; Information added by drupal.org packaging script on 2010-05-21
+;version = "6.x-dev"
+;core = "6.x"
+;project = "pwcs"
+;datestamp = "1274456709"

@@ -1,0 +1,589 @@
+<?php
+// $Id: pwcs.install,v 1.0 2010/08/17 rasel kabir Exp $
+
+/**
+ * @file
+ * pwcs installation.
+ * Added by Rasel Kabir
+ */
+
+/**
+ * Implementation of hook_install().
+ * Added by Rasel Kabir
+ */
+function pwcs_install() {
+  if (drupal_install_schema('pwcs') && pwcs_user_alter('install')) {
+      drupal_set_message(t('pwcs was successfully installed.'));
+  }
+  else {
+    drupal_set_message(t('The installation of pwcs was not successful.'), 'error');
+  }
+
+//	// Creating Site amdin custom menu
+//	$menu['menu_name'] = 'pwcs-siteadmin';
+//	$menu['title']= 'Site Admin';
+//	$menu['description']= 'Site admin menu for PWC Store module (pwcs). It will be available only for Siteadmin';
+//	db_query("INSERT INTO {menu_custom} (menu_name, title, description) VALUES ('%s', '%s', '%s')", $menu['menu_name'], $menu['title'], $menu['description']);
+
+	variable_set('pwcs_pwcbasicsettings_currency', 'USD');
+	variable_set('pwcs_pwcbasicsettings_currency_symbol', '$');
+	variable_set('pwcs_pwcbasicsettings_product_id_prefix', 'PRO'); // sample product ID = PRO-00001 (5 digit padding)
+}
+
+/**
+ * Implementation of hook_uninstall().
+ * Added by Rasel Kabir
+ */
+function pwcs_uninstall() {
+  drupal_uninstall_schema('pwcs');
+  pwcs_user_alter('uninstall');
+  db_query("DELETE FROM {variable} WHERE name LIKE 'pwcs_%%'");
+}
+
+/**
+ * Implementation of hook_schema().
+ * Added by Rasel Kabir
+ */
+function pwcs_schema() {
+
+  $schema['pwcs_category'] = array(
+    'description' => 'Category Table.',
+    'fields' => array(
+			'category_id' => array( 'type' => 'serial', 'unsigned' => TRUE,	'not null' => TRUE ),
+			'pwc_category_id' => array( 'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+			'parent_category_id' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'category_title' => array( 'type' => 'varchar', 'length' => 150, 'default' => NULL),
+			'category_level' => array( 'type' => 'int', 'length' => 5, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'has_child' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'is_editable' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'is_sync' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+  			//`created_on` datetime NOT NULL,
+			'created_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+  			//`modified_on` datetime NOT NULL,
+			'modified_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+			//'description' => array( 'type' => 'text'),
+    ),
+    'primary key' => array('category_id'),
+  );
+
+
+  $schema['pwcs_product'] = array(
+    'description' => 'Product Table.',
+    'fields' => array(
+		  	//`product_id` int(11) NOT NULL auto_increment,
+		  	'nid' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'pwc_product_row_id' => array( 'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+			'product_link_id' => array( 'type' => 'varchar',  'length' => 200, 'not null' => TRUE, 'default' => NULL ),
+			'product_sku' => array( 'type' => 'varchar', 'length' => 50, 'not null' => TRUE, 'default' => NULL),
+			'product_name' => array( 'type' => 'varchar', 'length' => 150, 'not null' => TRUE, 'default' => NULL),
+			'pwc_category_id' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'price' => array( 'type' => 'float', 'not null' => TRUE, 'default' => 0 ),
+			'regular_buy_link' => array( 'type' => 'varchar', 'length' => 150 ),
+			'one_click_buy_link' => array( 'type' => 'varchar', 'length' => 150 ),
+			'product_image_path' => array( 'type' => 'varchar', 'length' => 150 ),
+			'is_sync' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'created_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+			'modified_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+			//'description' => array( 'type' => 'text'),
+    ),
+    'primary key' => array('nid'),
+  );
+
+
+  $schema['pwcs_product_category'] = array(
+    'description' => 'Product Category Relation Table.',
+    'fields' => array(
+			'product_cateogry_id' => array( 'type' => 'serial', 'unsigned' => TRUE,	'not null' => TRUE ),
+			'category_id' => array( 'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+			'product_nid' => array( 'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+    ),
+    'primary key' => array('product_cateogry_id'),
+  );
+
+//  $schema['pwcs_settings'] = array(
+//    'description' => 'Product Category Relation Table.',
+//    'fields' => array(
+//			'settings_id' => array( 'type' => 'serial', 'unsigned' => TRUE,	'not null' => TRUE ),
+//			'merchant_enc_id' => array( 'type' => 'varchar', 'length' => 50 ),
+//			'site_api_key' => array( 'type' => 'varchar', 'length' => 50 ),
+//    ),
+//    'primary key' => array('settings_id'),
+//  );
+
+  $schema['pwcs_temp_order'] = array(
+    'description' => 'Product Category Relation Table.',
+    'fields' => array(
+			'temp_order_id' => array( 'type' => 'serial', 'unsigned' => TRUE,	'not null' => TRUE ),
+			'temp_order_session' => array( 'type' => 'varchar', 'length' => 255 ),
+			'pwc_order_temp_id' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'pwc_order_token' => array( 'type' => 'varchar', 'length' => 200 ),
+			'product_nid' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'amount' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 1 ),
+    ),
+    'primary key' => array('order_temp_id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * user table alter SQL
+ * Added by Rasel Kabir
+ */
+function pwcs_user_alter($condition = 'install') {
+
+	if($condition == 'install')
+	{
+		$ret = array();
+		db_add_field($ret, 'users', 'merchant_enc_id', array( 'type' => 'varchar', 'length' => 150, 'default' => NULL) );
+		db_add_field($ret, 'users', 'site_api_key', array( 'type' => 'varchar', 'length' => 150, 'default' => NULL) );
+		return $ret;
+	}
+	else if($condition == 'uninstall')
+	{
+		$ret = array();
+		db_drop_field($ret, 'users', 'merchant_enc_id');
+		db_drop_field($ret, 'users', 'site_api_key');
+		return $ret;
+	}
+}
+
+/**
+ * hook_update_1
+ * Added by Rasel Kabir on Sept 2010
+ */
+function pwcs_update_1()
+{
+	$ret = array();
+ 	db_query("ALTER TABLE  {pwcs_category} ADD  `weight` TINYINT( 4 ) NOT NULL DEFAULT  '0' AFTER  `is_sync`");
+ 	db_query("ALTER TABLE  {pwcs_category} ADD  `status` TINYINT( 4 ) NOT NULL DEFAULT  '1' AFTER  `weight`");
+	return $ret;
+}
+
+/**
+ * hook_update_2
+ * Added by Rasel Kabir on Sept 2010
+ */
+function pwcs_update_2()
+{
+	$ret = array();
+ 	db_query("ALTER TABLE {pwcs_product} ADD `pwc_image_select` INT NOT NULL DEFAULT '0'");
+	return $ret;
+}
+
+function pwcs_update_3()
+{
+    $ret = array();
+    $schema['pwcs_product_attributes'] = array(
+    'description' => 'Product Attributes Table.',
+    'fields' => array(
+            'attributes_id' => array( 'type' => 'serial'),
+            'nid' => array( 'type' => 'int', 'unsigned' => TRUE,    'not null' => TRUE, 'default' => 0 ),
+            'set_name' => array( 'type' => 'varchar', 'length'=>100),
+            'attr_group_id' => array( 'type' => 'int', 'length' => 10 ),
+            'attr_id' => array( 'type' => 'int', 'length' => 10 ),
+            'quantity' => array( 'type' => 'int', 'length'=> 10),
+            'inc_desc_amount' => array( 'type' => 'float','default'=>0),
+    ),
+    'primary key' => array('attributes_id'),
+  );
+  db_create_table($ret,'pwcs_product_attributes',$schema['pwcs_product_attributes']);
+  return $ret;
+}
+
+
+function pwcs_update_4()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'featured', array( 'type' => 'int', 'length' => 1, 'default' => 0) );
+	return $ret;
+}
+
+function pwcs_update_5()
+{
+  $ret = array();
+
+  $schema['pwcs_attr_groups'] = array(
+    'description' => 'Attribute Groups Table.',
+    'fields' => array(
+            'id' => array( 'type' => 'serial'),
+            'attr_group_name' => array( 'type' => 'varchar', 'length'=>100),
+            'attr_group_public_name' => array( 'type' => 'varchar', 'length'=>200),
+    ),
+    'primary key' => array('id'),
+  );
+  db_create_table($ret,'pwcs_attr_groups',$schema['pwcs_attr_groups']);
+
+  $schema['pwcs_attributes'] = array(
+    'description' => 'Attributes Table.',
+    'fields' => array(
+            'id' => array( 'type' => 'serial'),
+            'group_id' => array( 'type' => 'int', 'length' => 10 ),
+            'attr_name' => array( 'type' => 'varchar', 'length'=>200),
+            'weight' => array( 'type' => 'int', 'length' => 4 ),
+    ),
+    'primary key' => array('id'),
+  );
+  db_create_table($ret,'pwcs_attributes',$schema['pwcs_attributes']);
+
+  return $ret;
+}
+
+
+function pwcs_update_6()
+{
+  $ret = array();
+  $schema['pwcs_product_images'] = array(
+    'description' => 'Product Iamges Table.',
+    'fields' => array(
+            'id' => array( 'type' => 'serial'),
+            'nid' => array( 'type' => 'int', 'unsigned' => TRUE,    'not null' => TRUE, 'default' => 0 ),
+            'ppi_filepath' => array( 'type' => 'varchar', 'length'=>255),
+            'ppi_title' => array( 'type' => 'varchar', 'length'=>255),
+			'ppi_status' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 1 ),
+			'ppi_remotepath' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 1 ),
+    ),
+    'primary key' => array('id'),
+  );
+  db_create_table($ret,'pwcs_product_images',$schema['pwcs_product_images']);
+
+  return $ret;
+}
+
+function pwcs_update_7()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'related_products', array( 'type' => 'varchar', 'length' => 255, 'default' => NULL) );
+	return $ret;
+}
+
+function pwcs_update_8()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'product_manufacture', array( 'type' => 'text') );
+	return $ret;
+}
+
+function pwcs_update_9()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'manufacturer_id', array( 'type' => 'int', 'length' => 10, 'default' => 0) );
+	return $ret;
+}
+
+function pwcs_update_10()
+{
+  $ret = array();
+  $schema['pwcs_manufacturer'] = array(
+    'description' => 'Manufacturer Table.',
+    'fields' => array(
+			'mfg_id' => array( 'type' => 'serial'),
+			'pwc_mfg_id' => array( 'type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'default' => 0 ),
+			'mfg_name' => array( 'type' => 'varchar', 'length'=>255),
+			'is_sync' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'created_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+			'modified_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+    ),
+    'primary key' => array('mfg_id'),
+  );
+  db_create_table($ret,'pwcs_manufacturer',$schema['pwcs_manufacturer']);
+
+  return $ret;
+}
+function pwcs_update_11()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product_attributes', 'is_deleted', array( 'type' => 'int', 'length' => 1, 'default' => 0) );
+	db_add_field($ret, 'pwcs_attr_groups', 'weight',     array( 'type' => 'int', 'length' => 11, 'default' => -99) );
+	db_add_field($ret, 'pwcs_attr_groups', 'is_deleted', array( 'type' => 'int', 'length' => 1, 'default' => 0) );
+	db_add_field($ret, 'pwcs_attributes',  'is_deleted', array( 'type' => 'int', 'length' => 1, 'default' => 0) );
+	return $ret;
+}
+function pwcs_update_12()
+{
+	$ret = array();
+	db_drop_field($ret, 'pwcs_attributes',  'weight');
+	db_drop_field($ret, 'pwcs_attr_groups', 'attr_group_name');
+	db_add_field ($ret, 'pwcs_attributes',  'weight',     array( 'type' => 'int', 'length' => 11, 'default' => -99) );
+	
+	db_query("DROP TABLE {pwcs_product_attributes}");	
+	
+    $schema['pwcs_product_attributes'] = array(
+    'description' => 'Attributes Assigned to Products Table.',
+    'fields' => array(
+            'product_attributes_id' => array( 'type' => 'serial'),
+            'nid' => array( 'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+            'attr_id' => array( 'type' => 'varchar', 'length'=>150,'not null' => TRUE,'default' => ''),
+            'quantity' => array( 'type' => 'int', 'length'=> 11, 'default' => 0),
+            'affected_price' => array( 'type' => 'float','default'=>0),
+            'subsku' => array( 'type' => 'varchar', 'length'=>100, 'default' => '' ),
+            'is_deleted' => array( 'type' => 'int', 'length' => 1, 'default' => 0),
+             ),
+            'primary key' => array('product_attributes_id'),
+     );
+    db_create_table($ret,'pwcs_product_attributes',$schema['pwcs_product_attributes']);	
+	
+	
+	return $ret;
+}
+
+function pwcs_update_13()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_manufacturer', 'featured', array( 'type' => 'int', 'length' => 1, 'default' => 0) );
+	return $ret;
+}
+function pwcs_update_14()
+{
+	$ret = array();
+	db_query("ALTER TABLE  {pwcs_category} CHANGE  `is_editable`  `is_editable` TINYINT( 1 ) UNSIGNED NOT NULL DEFAULT  '1'");	
+	return $ret;
+}
+function pwcs_update_15()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_attr_groups', 'is_required', array( 'type' => 'int', 'length' => 1, 'default' => 0) );
+	return $ret;
+}
+function pwcs_update_16()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_attr_groups', 'pwc_group_row_id', array( 'type' => 'int', 'length' => 10, 'default' => 0) );
+	db_add_field($ret, 'pwcs_attributes', 'pwc_attribute_id', array( 'type' => 'int', 'size' => 'big', 'length' => 10, 'default' => 0) );
+	return $ret;
+}
+function pwcs_update_17()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'default_attribute', array('type' => 'varchar', 'length'=>150,'not null' => TRUE,'default' => '') );
+	return $ret;
+}
+
+
+function pwcs_update_18()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'product_reviews', array('type' => 'text', 'not null' => TRUE, 'default' => '') );
+	return $ret;
+}
+function pwcs_update_19()
+{
+	$ret = array();
+	db_drop_field($ret, 'pwcs_product', 'product_reviews');
+	db_add_field($ret, 'pwcs_product', 'listing_id', array('type' => 'varchar', 'length'=>150,'not null' => TRUE,'default' => '') );
+	return $ret;
+}
+function pwcs_update_20()
+{
+	$ret = array();
+  $schema['pwcs_listings'] = array(
+    'description' => 'Listing Table, that will allow to assign a product under multiple category',
+    'fields' => array(
+			'category_id' => array( 'type' => 'serial', 'unsigned' => TRUE,	'not null' => TRUE ),
+			'pwc_category_id' => array( 'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+			'parent_category_id' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'category_title' => array( 'type' => 'varchar', 'length' => 150, 'default' => NULL),
+			'category_type' => array( 'type' => 'int', 'length' => 1, 	'not null' => FALSE, 'default' => 0 ),
+			'weblink' => array( 'type' => 'varchar', 'length' => 150, 'not null' => FALSE, 'default' => ''),
+			'pagelink' => array( 'type' => 'int', 'length' => 1, 	'not null' => FALSE, 'default' => 0 ),
+			'menu_name' => array( 'type' => 'varchar', 'length' => 150, 'not null' => FALSE, 'default' => ''),
+			'menu_path' => array( 'type' => 'varchar', 'length' => 200, 'not null' => FALSE, 'default' => ''),
+			'category_level' => array( 'type' => 'int', 'length' => 5, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'has_child' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'is_editable' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'is_sync' => array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 0 ),
+			'weight' => array( 'type' => 'int', 'length' => 2, 	'not null' => TRUE, 'default' => 0 ),
+			'status' => array( 'type' => 'int', 'length' => 1, 	'not null' => TRUE, 'default' => 1 ),
+			'created_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+			'modified_on' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+    ),
+    'primary key' => array('category_id'),
+  );
+	db_create_table($ret,'pwcs_listings',$schema['pwcs_listings']);	
+  return $ret;
+}
+
+
+function pwcs_update_21()
+{
+	$ret = array();
+  $schema['pwcs_product_listing'] = array(
+    'description' => 'Mapping of Listing with node/products.',
+    'fields' => array(
+			'pwc_product_row_id' => array( 'type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+			'listing_id'         => array( 'type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+
+    ),
+  );  
+	db_create_table($ret,'pwcs_product_listing',$schema['pwcs_product_listing']);	
+
+  return $ret;
+}
+function pwcs_update_22()
+{
+$ret = array();
+	db_query("ALTER TABLE  {pwcs_listings} CHANGE  `pwc_category_id`  `pwc_category_id` INT( 10 ) NOT NULL DEFAULT  '-1'");	
+	db_query("ALTER TABLE  {pwcs_product_listing} CHANGE  `listing_id`  `listing_id` INT( 10 ) NOT NULL DEFAULT  '-1'");
+	db_query("UPDATE  {pwcs_product_listing} SET  `listing_id` =-1 WHERE `listing_id` =0");	
+	db_query("UPDATE  {pwcs_listings} SET  `pwc_category_id` =-1 WHERE `pwc_category_id` =0");	
+return $ret;	
+}
+function pwcs_update_23()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_listings', 'weblink_type', array( 'type' => 'int', 'length' => 1, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 1 ) );
+	return $ret;	
+}
+
+function pwcs_update_24()
+{
+  $ret = array();
+  $schema['pwcs_media_video'] = array(
+    'description' => 'Media Video Table.',
+    'fields' => array(
+            'video_id' => array( 'type' => 'serial'),
+            'video_title' => array( 'type' => 'varchar', 'length'=>255),
+            'video_description' => array( 'type' => 'text'),
+            'video_url' => array( 'type' => 'varchar', 'length'=>255),
+						'video_status' => array( 'type' => 'int', 'unsigned' => TRUE,	'not null' => TRUE, 'default' => 1 ),
+						'created' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+						'modified' => array( 'type' => 'int', 'not null' => TRUE, 'default' => 0 ),
+    ),
+    'primary key' => array('video_id'),
+  );
+  db_create_table($ret,'pwcs_media_video',$schema['pwcs_media_video']);
+  return $ret;
+}
+function pwcs_update_25()
+{
+	$ret = array();
+	db_add_field($ret, 'pwcs_product', 'videos', array( 'type' => 'text') );
+	return $ret;
+}
+//function pwcs_update_1() {
+//  $ret = array();
+//  db_rename_table($ret, 'sn_snid_tid', 'pwcs_snid_tid');
+//  return $ret;
+//}
+function pwcs_update_26()
+{
+	$ret = array();
+	db_add_field ($ret, 'pwcs_product_listing',  'weight',     array( 'type' => 'int', 'length' => 4, 'default' => -100) );
+	return $ret;
+}
+function pwcs_update_27()
+{
+	$ret = array();
+    $schema['pwcs_product_order'] = array(
+      'description' => 'Order Mapping of Listing with node/products.',
+      'fields' => array(
+			'pwc_product_row_id' => array( 'type' => 'int', 'length' => 10, 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0 ),
+			'listing_id'         => array( 'type' => 'int', 'length' => 10, 'unsigned' => FALSE, 'not null' => TRUE, 'default' => 0 ),
+			'weight'             => array( 'type' => 'int', 'length' => 4, 'not null' => TRUE, 'default' => -100), 
+
+      ),
+    );  
+	db_create_table($ret,'pwcs_product_order',$schema['pwcs_product_order']);	
+
+  return $ret;
+}
+
+/**
+ * Activate Comments for all products
+ * Added by Rasel Kabir
+ */
+function pwcs_update_28()
+{
+	$ret = array();
+
+	// COMMENT SETTINGS
+	variable_set('comment_product', 2);
+	variable_set('comment_default_mode_product', 4);
+	variable_set('comment_default_order_product', 1);
+	variable_set('comment_default_per_page_product', 50);
+	variable_set('comment_controls_product', 0);
+	variable_set('comment_anonymous_product', 1);
+	variable_set('comment_subject_field_product', 1);
+	variable_set('comment_preview_product', 0);
+	variable_set('comment_form_location_product', 1);
+
+	// FIVESTAR SETTINGS
+	$fivestar_labels_product = array( 'No Rating', 'Poor', 'Okay', 'Good', 'Great', 'Awesome', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count' );
+	variable_set('fivestar_labels_product', $fivestar_labels_product);
+	variable_set('fivestar_widget', 'sites/all/modules/fivestar/widgets/flames/flames.css');
+	variable_set('fivestar_labels_enable_product', 1);
+	variable_set('fivestar_stars_product', 5);
+	variable_set('fivestar_color_type', 'solid');
+	variable_set('fivestar_product', 1);
+	variable_set('fivestar_style_product', 'dual');
+	variable_set('fivestar_text_product', 'dual');
+	variable_set('fivestar_title_product', 1);
+	variable_set('fivestar_feedback_product', 1);
+	variable_set('fivestar_unvote_product', 0);
+	variable_set('fivestar_position_teaser_product', 'above');
+	variable_set('fivestar_position_product', 'above');
+	variable_set('fivestar_comment_product', 1);
+    $fivestar_colors = array( 'on1' => '#fff633', 'on2' => '#f5d000', 'hover1' => '#d2e7f9', 'hover2' => '#027ac6', 'off1' => '#cccccc', 'off2' => '#dfdfdf', 'matte' => '#ffffff' );
+	variable_set('fivestar_colors', $fivestar_colors);
+
+	variable_set('node_rank_comments', 5);
+
+	// Voting API Set
+	variable_set('votingapi_anonymous_window', 86400);
+	variable_set('votingapi_calculation_schedule', 'immediate');
+
+	//Enable Comments for All Products
+	db_query("UPDATE {node} SET `comment` = 2 WHERE `type`='product'");	
+
+	//Set comment permissions for End User (anonymous user = 1 and authenticated user = 2)
+	$perms = array('access comments', 'post comments');
+	pwcs_addpermission($perms, 'anonymous user');
+	$perms = array('access comments', 'post comments', 'post comments without approval');
+	pwcs_addpermission($perms, 'authenticated user');
+	variable_set('pwcs_sitesettings_productreview_approvecomments', '1');
+
+	//Set comment permissions for Siteadmin (siteadmin = 3 and superadmin = 4)
+	$perms = array('access comments', 'administer comments', 'post comments', 'post comments without approval');
+	pwcs_addpermission($perms, 'siteadmin');
+	pwcs_addpermission($perms, 'superadmin');
+	//pwcs_removepermission($perms , 'anonymous user');
+
+	//Set Five star Permissions
+    pwcs_addpermission('rate content', 'anonymous user');
+    pwcs_addpermission('rate content', 'authenticated user');
+    pwcs_addpermission('rate content', 'siteadmin');
+    pwcs_addpermission('rate content', 'superadmin');
+
+	//Set Voting API Permissions
+    pwcs_addpermission('administer voting api', 'siteadmin');
+    pwcs_addpermission('administer voting api', 'superadmin');
+
+	return $ret;	
+}
+
+/* Added for Sales Price */
+function pwcs_update_29()
+{	
+	$ret = array();
+	$schema['pwcs_product_sales'] = array(
+		'description' => 'Product Sales Price.',
+		'fields' => array(
+			'nid' 					=> array('type'=>'int', 'unsigned'=>TRUE, 'not null'=>TRUE, 'default'=>0),
+			'pwc_product_row_id'	=> array('type'=>'int', 'unsigned'=>TRUE, 'not null'=>TRUE, 'default'=>0),
+			'product_sale_price'	=> array('type'=>'float', 'precision'=>10, 'scale'=>2),
+			'enable_sales_price'	=> array('type'=>'int', 'size'=>'tiny', 'unsigned'=>TRUE, 'default'=>0),
+			'sale_price_start_date'	=> array('type'=>'int', 'unsigned'=>TRUE, 'default'=>0),
+			'sale_price_end_date' 	=> array('type'=>'int', 'unsigned'=>TRUE, 'default'=>0),
+			'sale_tag_icon' 		=> array('type'=>'int', 'size'=>'tiny', 'unsigned'=>TRUE, 'default'=>1),
+		),
+		'primary key' => array('nid'),
+	);
+	db_create_table($ret, 'pwcs_product_sales', $schema['pwcs_product_sales']);
+	return $ret;
+}
+//function pwcs_update_30()
+//{
+//	$ret = array();
+//	db_add_field ($ret, 'pwcs_product',  'reconditioned',     array( 'type' => 'int', 'size'=>'tiny', 'unsigned'=>TRUE, 'default'=>0) );
+//	return $ret;
+//}

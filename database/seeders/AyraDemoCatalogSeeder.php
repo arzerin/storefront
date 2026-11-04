@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
 class AyraDemoCatalogSeeder extends Seeder
@@ -17,6 +18,7 @@ class AyraDemoCatalogSeeder extends Seeder
         ];
 
         foreach ($samples as [$name, $description, $price, $category, $image, $colors, $sizes]) {
+            Category::firstOrCreate(['name' => $category]);
             $product = Product::firstOrCreate(['name' => $name], [
                 'description' => $description,
                 'price' => $price,
@@ -76,5 +78,10 @@ class AyraDemoCatalogSeeder extends Seeder
         Product::whereIn('name', ['Tshirt', 'Laravel Cap', 'Laravel Scrunchy', 'Sweater'])
             ->whereNotIn('name', array_column($samples, 0))
             ->update(['is_published' => false]);
+
+        $this->call(AyraExpandedCatalogSeeder::class);
+        $this->call(AyraCollectionsSeeder::class);
+        $this->call(AyraManufacturersSeeder::class);
+        $this->call(AyraSiteContentSeeder::class);
     }
 }

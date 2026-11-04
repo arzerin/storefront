@@ -1,0 +1,464 @@
+/* $Id: pwcs_siteadmin.css,v 1.6.2.1 2011/02/20 rasel kabir Exp $ */
+
+.toggle-featured{
+	outline-style:none;
+}
+
+.pwcs-checkbox-checked{
+	height: 24px;
+	width: 24px;
+	margin:auto;
+    background: transparent url(../images/checkbox.png) 50% 0% no-repeat !important;
+}
+
+.pwcs-checkbox-notchecked{
+	height: 24px;
+	width: 24px;
+	margin:auto;
+    background: transparent url(../images/checkbox.png) 50% 100% no-repeat !important;
+}
+
+
+ul.pwcs-siteadminnav{
+    margin-top: 10px !important;
+    padding: 5px 0 !important;
+}
+
+.pwcs_quickview_yes {
+    background: transparent url(../images/pwcs_quickview_yes.png) 50% 50% no-repeat !important;
+    height: 16px;
+    width: 16px;
+}
+
+.pwcs_quickview_no {
+    background: transparent url(../images/pwcs_quickview_no.png) 50% 50% no-repeat !important;
+    height: 16px;
+    width: 16px;
+}
+
+#pwcs_manufacturer_setfeatured_form_featured_checkboxes .form-checkboxes .form-item {
+	float:left;
+	width: 25%;
+}
+
+/*** Edit product >> **/
+#product_related_products_selection .form-checkboxes .form-item{
+	float:left;
+	width: 130px;
+	border: 1px solid #ddd;
+	margin: 3px;
+}
+
+#product_image_selection .form-radios .form-item{
+	border:1px solid #DDDDDD;
+	float:left;
+	height:115px;
+	margin:2px;
+	overflow:hidden;
+	padding:3px;
+	position:relative;
+	text-align:center;
+	width:115px;
+}
+
+#product_image_selection .form-radios .form-item input{
+	bottom:5px;
+	left:5px;
+	margin:0;
+	padding:0;
+	position:absolute;
+}
+
+.pwcs-item-selected {
+    background-color: #DAEBF1;
+    border: 1px solid #23819F !important;
+/*    font-weight: bold !important;
+    padding: 4px 6px 1px 0;*/
+}
+
+#pwcs_add_edit_products .node-form {
+	position: relative;
+}
+
+.add_edit_products_buttons {
+    position: absolute;
+    right: 15px;
+    top: 45px;
+}
+
+.add_edit_products_buttons input {
+	padding: 2px 8px;
+}
+
+#pwcs_add_edit_products .ui-tabs-panel{
+	margin-top: 50px;
+	border-top: 1px solid #ddd;
+}
+#pwcs_add_edit_products .ui-tabs .ui-tabs-nav li.ui-tabs-selected {
+    padding-bottom: 0px;
+}
+/* filter form */
+#pwcs-siteadmin-products-filter-form{
+    margin: 0 !important;
+    padding: 10px;
+}
+#pwcs-siteadmin-products-filter-form .form-item {
+    clear: both;
+    float: none;
+    margin: 0;
+    padding: 5px;
+}
+#pwcs-siteadmin-products-filter-form .form-item .form-item {
+    margin: 0;
+    padding: 0;
+}
+
+#pwcs-siteadmin-products-filter-form .form-item label{
+	float:left;
+    width: 150px;
+}
+#pwcs-siteadmin-products-filter-form .form-item .form-item label{
+	float:none;
+    width: auto;
+}
+#pwcs-siteadmin-products-filter-form .form-item .form-checkboxes {
+	float:left;
+}
+#pwcs-siteadmin-products-filter-form .form-item input{
+
+}
+
+.button-container{
+	margin:5px;
+	padding:0;
+	text-align:center;
+}
+/*
+#pwcs-siteadmin-products-filter-form .form-submit{
+	margin:0 5px;
+}
+*/
+
+#pwcs_product_list_filter_box {
+	border: 1px solid #E8F5FA;
+}
+/*** << Edit product **/
+
+/*** START Product Single View Admin CSS ***/
+#pwcs_psv_options .form-radios .form-item{
+    border: 1px solid #DDD;
+    margin: 10px 5px;
+    overflow: hidden;
+    padding: 10px;
+    position: relative;
+    width: auto;
+}
+#pwcs_psv_options .psv_view{
+	border: 1px dotted #CCC;
+}
+#pwcs_psv_options .form-radios .form-item label.option input {
+    position: absolute;
+    top: 27px;
+    left: 15px;
+    margin: 0;
+    padding: 0;
+}
+#pwcs_psv_options .admin_psv_options{
+	margin: 5px; 
+	width: auto;
+}
+#pwcs_psv_options .option_title_details {
+	padding: 5px 0 0 20px;
+}
+
+#pwcs_psv_options .option_title_details .title {
+	font-weight: bold;
+}
+
+.showhidelink {
+	font-size: 0.8em;
+}
+
+/*** END Product Single View Admin CSS ***/
+
+.siteadmin-floating-navigation {
+    position: fixed;
+    top: 10px;
+    left: 0;
+}
+
+.siteadmin-floating-navigation .bg-top {
+    background: url("../images/siteadmin-floating-nav-bg-top.png") no-repeat scroll 0 0 transparent;
+    height: 17px;
+    width: 140px;
+}
+.siteadmin-floating-navigation .bg-mid {
+    background: url("../images/siteadmin-floating-nav-bg-mid.png") repeat-y scroll 0 0 transparent;
+    width: 140px;
+	display: inline-block;
+}
+
+.siteadmin-floating-navigation .bg-bottom {
+    background: url("../images/siteadmin-floating-nav-bg-bottom.png") no-repeat scroll 0 100% transparent;
+    height: 17px;
+    width: 140px;
+}
+.siteadmin-floating-navigation a {
+    display: block;
+    height: 16px;
+    line-height: 16px;
+    margin: 10px;
+    padding-left: 20px;
+    text-align: left;
+    text-decoration: none !important;
+	color:#000;
+	border: 1px solid #FFF;
+}
+.siteadmin-floating-navigation a:hover {
+	background-color: #4492da !important;
+	border: 1px solid #4492da;
+	color:#FFF;
+}
+.siteadmin-floating-navigation a.return {
+    background: url("../images/return.png") no-repeat scroll 0 0;
+}
+
+.siteadmin-floating-navigation a.addblock {
+    background: url("../images/add-block.png") no-repeat scroll 0 0;
+}
+
+/*** system-theme-settings ***/
+
+#system-theme-settings .form-item label{
+	float:left;
+	width: 32%;
+}
+
+#system-theme-settings .form-radios{
+	float:left;
+}
+
+
+#system-theme-settings .form-radios .form-item label{
+	float:none;
+	width: auto;
+}
+
+#system-theme-settings #theme_grid_config .form-item label {
+	float:left;
+	width: 50%;
+}
+
+#system-theme-settings #colorsettings .form-item {
+	clear:both;
+}
+#system-theme-settings #colorsettings .form-item label {
+	float:left;
+	width: 40%;
+}
+
+#system-theme-settings #edit-customcss-wrapper label
+{
+	float:none;
+	width: 100%;
+}
+
+#system-theme-settings .colorsettings .form-item .description {
+	float:right;
+	width: 30%;
+}
+
+/*
+#system-theme-settings #colorsettings .form-item .description {
+	float:right;
+	width: 40%;
+}
+*/
+
+
+#pwcs_videos_list_filter {
+	text-align:right;
+	margin:10px 5px;
+}
+
+.pwcs_video_list_count{
+	float:right; 
+	width:auto; 
+	margin:5px 5px;
+}
+
+#block-admin-display-form {
+	padding: 5px;
+	border: 2px solid #AAA;
+}
+
+.content-inner h1.title {
+	margin: 0;
+	padding:0;
+}
+
+
+.radios-inline .form-radios .form-item{
+    display: inline-block;
+    margin: 0 10px;
+    padding: 2px;
+    position: relative;
+    text-align: center;
+}
+
+.radios-inline .form-radios .form-item input{
+    margin: 0;
+    vertical-align: middle;
+}
+
+.ui-tabs-nav
+{
+	margin:0 !important;
+}
+
+/******* SITEADMIN HOMEPAGE *******/
+
+.siteadmin_dashboard {
+/*	-moz-box-shadow: 0 0 5px 0 #ddd; */
+/*	-webkit-box-shadow: 0 0 5px 0 #ddd; */
+  margin: 15px 0;
+}
+
+.siteadmin_dashboard .sd_item {
+	float: left;
+    width: auto;
+}
+.siteadmin_dashboard .sd_item a{
+    background: url("../images/dashboard-button-bg.png") no-repeat scroll 0 0 transparent;
+    box-shadow: 0 0 5px 0 #DDDDDD;
+    display: block;
+    height: 83px;
+    margin: 12px 16px;
+    text-decoration: none;
+    width: 267px;
+	-moz-box-shadow: 0 0 5px 0 #ddd;
+	-webkit-box-shadow: 0 0 5px 0 #ddd;
+}
+.siteadmin_dashboard .sd_item a:hover{
+    text-decoration:none;
+	box-shadow: 0 0 5px 0 #999999;
+	-moz-box-shadow: 0 0 5px 0 #999999;
+	-webkit-box-shadow: 0 0 5px 0 #999999;
+}
+
+.siteadmin_dashboard .sd_item_inner {
+}
+
+.siteadmin_dashboard .sd_item_inner:hover {
+}
+
+
+.siteadmin_dashboard .sd_item_inner .image {
+	float:left;
+}
+
+.siteadmin_dashboard .sd_item_inner .text{
+    color: #29567E;
+    font-family: "Myriad Pro";
+    font-size: 20px;
+    line-height: 20px;
+    padding-right: 55px;
+    padding-top: 32px;
+}
+
+.siteadmin_dashboard .sd_item_inner .myorders {
+    background: url("../images/dashboard-myorders.png") no-repeat scroll 0 0 transparent;
+    height: 45px;
+    width: 53px;
+    margin: 20px 10px 0 20px;
+}
+.siteadmin_dashboard .sd_item_inner .myproducts {
+    background: url("../images/dashboard-myproducts.png") no-repeat scroll 0 0 transparent;
+    height: 58px;
+    width: 66px;
+    margin: 20px 1px 0 10px;
+}
+.siteadmin_dashboard .sd_item_inner .pricemanager {
+    background: url("../images/dashboard-pricemanager.png") no-repeat scroll 0 0 transparent;
+    height: 69px;
+    margin: 10px 0 0 2px;
+    width: 65px;
+}
+
+.siteadmin_dashboard .sd_item_inner .pagebuilder {
+    background: url("../images/dashboard-pagebuilder.png") no-repeat scroll 0 0 transparent;
+    height: 72px;
+    margin: 10px 1px 0 10px;
+    width: 65px;
+}
+.siteadmin_dashboard .sd_item_inner .mediamanager {
+    background: url("../images/dashboard-mediamanager.png") no-repeat scroll 0 0 transparent;
+    height: 57px;
+    margin: 19px 3px 0 5px;
+    width: 64px;
+}
+.siteadmin_dashboard .sd_item_inner .productreview {
+    background: url("../images/dashboard-productreview.png") no-repeat scroll 0 0 transparent;
+    height: 71px;
+    margin: 10px 0 0 5px;
+    width: 70px;
+}
+
+.siteadmin_dashboard .sd_item_inner .searchreports {
+    background: url("../images/dashboard-searchreports.png") no-repeat scroll 0 0 transparent;
+    height: 65px;
+    margin: 10px 1px 0 10px;
+    width: 64px;
+}
+.siteadmin_dashboard .sd_item_inner .socialmedia {
+    background: url("../images/dashboard-socialmedia.png") no-repeat scroll 0 0 transparent;
+    height: 63px;
+    margin: 15px 5px 0 15px;
+    width: 72px;
+}
+.siteadmin_dashboard .sd_item_inner .manufacturer {
+    background: url("../images/dashboard-manufacturer.png") no-repeat scroll 0 0 transparent;
+    height: 74px;
+    margin: 8px 5px 0 10px;
+    width: 74px;
+}
+
+/**********************************/
+ ul#downmenu, ul#downmenu li {
+        margin: 0;
+        padding: 0;
+		list-style-type: none;
+    }
+    /* Display parent unordered list items horizontally */
+    ul#downmenu li {
+        float: left;
+		list-style: square inside;
+		color:blue;
+        list-style: none;       /* Get rid of default Browser styling */
+        margin-right: 10px;     /* Add some space between items */
+		background: transparent url(l.gif) no-repeat 1px .35em; /* LTR */
+    }
+        /* Hide inset unordered Lists */
+        ul li ul {
+            display: none;
+			list-style: none;
+        }
+        /* Un-Hide inset unordered Lists when parent <li> is hovered over */
+        ul#downmenu li:hover ul#downmenu-list{
+            display: block;
+			list-style: none;
+            position: absolute;
+			color:#ff0000;
+			cursor: pointer;
+			margin-top: -2px;
+        }
+        ul#downmenu li:hover ul#downmenu-list li {
+           clear: left;      
+		   list-style: none;       
+        }
+div#lisiting-drop-down-box{
+	background-color:#ccc;
+	padding-left:0px;
+	padding-right:20px;
+	color:#FF0000;
+}

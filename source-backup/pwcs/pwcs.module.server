@@ -1,0 +1,2612 @@
+<?php
+// $Id: pwcs.module,v 1.0 2010/08/17 rasel kabir <shuvro.mist@gmail.com> Exp $
+
+/** start>> Helper and other php file includes **/
+include_once('pwcs_common.php');
+include_once('pwcs_api_lib.php');
+include_once('pwcs_user.php');
+include_once('pwcs_category.php');
+include_once('pwcs_list.php');
+include_once('pwcs_product.php');
+include_once('pwcs_cart.php');
+include_once('pwcs_product_single_view.php');
+include_once('pwcs_manufacturers.php');
+include_once('pwcs_search.php');
+include_once('pwcs_media.php');
+include_once('pwcs_block.php');
+include_once('pwcs_product_review.php');
+//include_once('pwcs_parser4.php');
+/** <<end Helper and other php file includes **/
+
+
+global $user;
+$finalmsgs = array();
+
+/** start>> Define variables **/
+define('TIME_FORMAT','Y-m-d');
+define('ADMIN_TIME_FORMAT','Y-m-d h:m:s');
+//define('FILE_PATH','sites/default/files/');
+define('PWCS_MODULE_IMAGE', drupal_get_path('module', 'pwcs') .'/images/');
+
+define('PWCS_PRODUCT_DEFAULT_IMAGE', PWCS_MODULE_IMAGE.'default_product.png');
+
+define('PWCS_VIDEO_DEFAULT_THUMBNAIL', PWCS_MODULE_IMAGE.'video_default_thumb.png');
+
+define('PWCS_CATEGORY_DEFAULT_NAME', 'Miscellaneous');
+define('PWCS_CATEGORY_DEFAULT_VALUE', '0');
+
+define('PWCS_ATTRIBUTE_GROUP_NAME', 'Attribute Group');
+define('PWCS_ATTRIBUTE_NAME', 'Attribute');
+define('PWCS_LISTING_NAME', 'Listing');
+
+//BASE URLS
+define('PWCS_STORE_URL', url(NULL, array('absolute' => TRUE)));
+define('PWCS_PWC_CORE_URL', variable_get('pwcs_pwc_core_url', 'https://www.secureinfossl.com/'));
+
+//Basic Settings
+define('PWCS_BASIC_CURRENCY', variable_get('pwcs_pwcbasicsettings_currency', 'USD'));
+define('PWCS_BASIC_CURRENCY_SYMBOL', variable_get('pwcs_pwcbasicsettings_currency_symbol', '$'));
+define('PWCS_BASIC_PRODUCTID_PREFIX', variable_get('pwcs_pwcbasicsettings_product_id_prefix', 'PRO')); // sample product ID = PRO-00001 (5 digit padding)
+define('PWCS_BASIC_PRODUCTID_PADDING_AMOUNT', variable_get('pwcs_pwcbasicsettings_product_id_paddingamount', '5'));
+
+//THEME FOOTER SECURITY INFO
+$footer_security_text = t('Website Powered & Secured By').' '.theme_image(PWCS_MODULE_IMAGE.'pwc_logo.png', $alt = '').' '.t('PremiumWebCart.com').'.';
+define('PWCS_SECURITY_TEXT', $footer_security_text);
+
+//define for Siteadmin
+
+if (user_access('is siteadmin') && ($user->uid != 1)){
+	
+	if (drupal_is_front_page()) {
+		drupal_goto('siteadmin');
+	}
+	
+	$apiKey = variable_get('pwcs_target_url_cart_apikey', 'PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=');
+	$appId = variable_get('pwcs_target_url_applicationid', '10006');
+
+	$time = ''; //date('dmyH', time());
+	//pwcs_debug_file_write('Time for Hash ' . date('dmyH', time()), false);
+
+	$before_hash = $apiKey . ":" . $appId . ":" . $user->merchant_enc_id . ":" . $time;
+	//pwcs_debug_file_write('Before Hash ' . $before_hash, false);
+
+	$hash = md5($apiKey . ":" . $appId . ":" . $user->merchant_enc_id . ':' . $time);
+	//pwcs_debug_file_write('Hash ' . $hash, false);
+
+	$pwc_autologin_url = PWCS_PWC_CORE_URL.'?con=login&met=authenticate&m='.$user->merchant_enc_id.'&a='.$appId.'&t='.$hash.'&r=';
+	define('PWCS_PWC_AUTO_LOGIN_URL', $pwc_autologin_url);
+
+	//pwcs_debug_file_write('PWCS PWC AUTO LOGIN URL ' . PWCS_PWC_AUTO_LOGIN_URL, false);
+
+	//if(variable_get('pwcs_enable_cache', '0') == 0) {
+	//    pwcs_flush_cache();
+	//}
+}
+
+/** <<end Define variables **/
+
+/**
+ * Jquery UI JS and CSS import
+ * Added by Rasel Kabir
+ */
+if (module_exists('jquery_ui'))
+{
+	// By default PWCS module search for jquery theme at your theme folder "YOURTHEME/jqueryui/jquery-ui.css" path. 
+	// If there is no such directory like "YOURTHEME/jqueryui/jquery-ui.css" then there will be no theme selected.
+	$current_theme = ($user->theme)?$user->theme:variable_get('theme_default','none');
+	if(file_exists(drupal_get_path('theme', $current_theme).'/jqueryui/jquery-ui.css')){
+		$jQueryUI_css = drupal_get_path('theme', $current_theme).'/jqueryui/jquery-ui.css';
+		drupal_add_css($jQueryUI_css, 'theme');
+	} else {
+		// No theme selected.
+		$jQueryUI_css = drupal_get_path('module', 'jquery_ui').'/jquery.ui/themes/ui-lightness/jquery-ui-1.7.3.custom.css';
+		drupal_add_css($jQueryUI_css, 'theme');
+	}
+	drupal_add_js(drupal_get_path('module', 'jquery_ui') .'/jquery-ui-1.7.3.custom.min.js', 'core', 'footer');
+}
+
+/** Start>> Module CSS JS files
+  * Added by Rasel Kabir
+  */
+drupal_add_css(drupal_get_path('module', 'pwcs') .'/css/pwcs.css', 'module');
+drupal_add_js(drupal_get_path('module', 'pwcs') .'/js/pwcs.js', 'module');
+
+// CSS only for Siteadmin user.
+if (user_access('is siteadmin')){
+	//JS for only SITEADMIN
+	drupal_add_css(drupal_get_path('module', 'pwcs') .'/css/pwcs_siteadmin.css', 'module');
+	drupal_add_js(drupal_get_path('module', 'pwcs') .'/js/pwcs_admin.js', 'module');
+	//drupal_add_js(drupal_get_path('module', 'pwcs') .'/js/pwcs_stickyfloat.js', 'module');
+}
+
+// CORE CSS modification/hack
+if ($user->uid > 1) { // This CSS will be effected for ALL USERS except DEVELOPER ADMIN
+	drupal_add_css(drupal_get_path('module', 'pwcs').'/css/pwcs_core_hack.css', 'module');
+}
+
+//jcarousel
+drupal_add_css(drupal_get_path('module', 'pwcs') .'/jcarousel/skins/tango/skin.css', 'theme');
+drupal_add_js(drupal_get_path('module', 'pwcs') .'/jcarousel/lib/jquery.jcarousel.min.js', 'module', 'footer');
+
+/** <<end Module CSS JS files */
+
+/**
+ * Implementation of hook_perm().
+ * Added by Rasel Kabir
+ */
+function pwcs_perm() {
+
+	$perms = array();
+	$perms = array_merge($perms, pwcs_user_perm());
+	$perms = array_merge($perms, pwcs_product_perm());
+	return $perms;
+}
+
+/**
+ * Implementation of hook_init().
+ * Added by Rasel Kabir
+ */
+function pwcs_init() {
+
+	// pwcs can not work without this variable.
+	if ( ((variable_get('pwcs_pwc_core_url', '')) == '')  || ((variable_get('pwcs_target_url_categorylist', '')) == '') || ((variable_get('pwcs_target_url_productlist', '')) == '')) {
+		drupal_set_message(t('Missing necessary URLs, Please set the variables URL at <a href="@settings">pwcs settings</a>.', array('@settings' => url('admin/settings/pwcs'))), 'error');
+	}
+}
+
+/**
+ * Implementation of hook_menu().
+ * Added by Rasel Kabir
+ */
+function pwcs_menu() {
+
+	$items = array();
+	include_once(drupal_get_path('module', 'pwcs').'/pwcs_navigation.php');
+	$items = pwcs_siteadmin_url_items();
+	return $items;
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ * Added by Rasel Kabir
+ */
+function pwcs_menu_alter(&$items) {
+
+//	global $user;
+//	if ($user->uid != 1) {
+//		$items['admin/build/block/list/garland']['access arguments'] = array('administer');
+//		$items['admin/build/block/list/garland']['access callback'] = FALSE;
+//	}
+
+}
+
+
+/**
+ * Implementation of hook_menu_link_alter().
+ * Added by Rasel Kabir
+ */
+function pwcs_menu_link_alter(&$item, $menu) {
+
+//  if (strpos($item['link_path'], 'admin') === 0 && empty($item['mlid'])) {
+//    $item['hidden'] = 1;
+//  }
+//  if ($item['link_path'] == 'devel/cache/clear') {
+//    $item['options']['alter'] = TRUE;
+//  }
+}
+
+
+/**
+ * Implementation of hook_block().
+ * Added by Rasel Kabir
+ */
+function pwcs_block($op = 'list', $delta = 0, $edit = array())
+{
+	if ($op == 'list')
+	{
+		$blocks['sidebar_category_menu']['info'] = t('Category Menu');
+		$blocks['sidebar_category_menu']['weight'] = -10;
+		$blocks['sidebar_category_menu']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['sidebar_category_menu']['region'] = 'sidebar_first';
+
+	    $blocks['sidebar_listing_menu']['info'] = t('Listings Menu');
+		$blocks['sidebar_listing_menu']['weight'] = -8;
+		$blocks['sidebar_listing_menu']['status'] = 0; // 1 = enabled, 0 = disabled
+		$blocks['sidebar_listing_menu']['region'] = 'sidebar_first';
+
+		$blocks['sidebar_manufacture_block']['info'] = t('Manufacture Menu');
+		$blocks['sidebar_manufacture_block']['weight'] = -9;
+		$blocks['sidebar_manufacture_block']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['sidebar_manufacture_block']['region'] = 'sidebar_first';
+
+		$blocks['homepage_products']['info'] = t('Home Products');
+		$blocks['homepage_products']['weight'] = -10;
+		$blocks['homepage_products']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['homepage_products']['region'] = 'content';
+		$blocks['homepage_products']['visibility'] = 1;  //0: Show on all pages except listed pages. 'homepage_products': Show only on listed pages. 2: Use custom PHP code to determine visibility.
+		$blocks['homepage_products']['pages'] = '<front>';
+
+		$blocks['siteadmin_navigation']['info'] = t('Siteadmin Navigation');
+		$blocks['siteadmin_navigation']['weight'] = -10;
+		$blocks['siteadmin_navigation']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['siteadmin_navigation']['region'] = 'left';
+
+		$blocks['siteadmin_navigation_top']['info'] = t('Siteadmin Header Navigation');
+		$blocks['siteadmin_navigation_top']['weight'] = -10;
+		$blocks['siteadmin_navigation_top']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['siteadmin_navigation_top']['region'] = 'header_menu';
+
+
+		$blocks['header_banner']['info'] = t('Header Banner');
+		$blocks['header_banner']['weight'] = -10;
+		$blocks['header_banner']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['header_banner']['region'] = 'header';
+
+		$blocks['welcome_text']['info'] = t('Welcome Text');
+		$blocks['welcome_text']['weight'] = -10;
+		$blocks['welcome_text']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['welcome_text']['region'] = 'preface-bottom';
+
+		if(variable_get('pwcs_admin_enable_imageslideshow', 0) == 1) {
+		$blocks['image_slideshow']['info'] = t('Image Slideshow');
+		$blocks['image_slideshow']['weight'] = -10;
+		$blocks['image_slideshow']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['image_slideshow']['region'] = 'preface-top';
+		}
+
+		$blocks['cart_link']['info'] = t('Cart');
+		$blocks['cart_link']['weight'] = -9;
+		$blocks['cart_link']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['cart_link']['region'] = 'header';
+
+		$blocks['fatured_products']['info'] = t('Featured Products');
+		$blocks['fatured_products']['weight'] = -9;
+		$blocks['fatured_products']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['fatured_products']['region'] = 'right';
+
+		$blocks['sitesearch_input']['info'] = t('Site Search');
+		$blocks['sitesearch_input']['weight'] = -10;
+		$blocks['sitesearch_input']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['sitesearch_input']['region'] = 'header';
+
+		$blocks['topsearch_keywords']['info'] = t('Top Search Keywords');
+		$blocks['topsearch_keywords']['weight'] = -10;
+		$blocks['topsearch_keywords']['status'] = 1; // 1 = enabled, 0 = disabled
+		$blocks['topsearch_keywords']['region'] = 'postscript_bottom';
+
+		return $blocks;
+	}
+
+	else if ($op == 'configure') {
+
+		switch($delta)
+		{
+			case 'sidebar_category_menu':
+			break;
+
+			case 'homepage_products':
+				$form['pwcs_homepage_products_block_amount'] = array(
+					'#type' => 'textfield',
+					'#title' => t('Number of products per page'),
+					'#default_value' => variable_get('pwcs_homepage_products_block_amount', 10),
+				);
+				$form['pwcs_homepage_products_block_featured'] = array(
+					'#type' => 'checkbox',
+					'#title' => t('Show Only Featured Products'),
+					'#default_value' => variable_get('pwcs_homepage_products_block_featured', 1),
+				);
+				//variable_get('pwcs_homepage_products_block_theme', 'spv_normal')
+				$form['pwcs_psv_options'] = array('#type' => 'fieldset', '#title' => t('Product View Settings for Category/Listings'));
+				$form['pwcs_psv_options']['#prefix'] = '<div id="pwcs_psv_options">';
+				$form['pwcs_psv_options']['#suffix'] = '</div>';
+				$form['pwcs_psv_options']['#collapsible'] = 1;
+				$form['pwcs_psv_options']['#collapsed'] = 1;
+				$product_block_themes = pwcs_product_single_view_options();
+				$form['pwcs_psv_options']['pwcs_homepage_products_block_theme'] = array(
+					'#type' => 'radios',
+					'#options' => $product_block_themes,
+					'#title' => t('View Theme'),
+					'#description' => t('Selected theme will shown for homepage products block'),
+					'#default_value' => variable_get('pwcs_homepage_products_block_theme', 'spv_normal'),
+				);
+
+
+			break;
+
+			case 'header_banner':
+
+				$form['pwcs_headerbanner_image_formset']['#prefix'] = '<div class="pwcs_headerbanner_image_formset">';
+				$form['pwcs_headerbanner_image_formset']['#suffix'] = '</div>';
+				$header_banner_output = '<div id="pwcs-header-banner-add-image-preview" class="pwcs-item-preview">'.variable_get('pwcs_headerbanner_image', '').'</div>'
+																.'<a class="button" id="pwcs-header-banner-add-image">Add Header Image</a> <a class="button" id="pwcs-header-banner-add-image-remove">Remove</a>';
+				$form['pwcs_headerbanner_image_formset']['pwcs_headerbanner_image_link'] = array(
+					'#type' => 'markup',
+					'#value' => $header_banner_output,
+				);
+				$form['pwcs_headerbanner_image_formset']['pwcs_headerbanner_image'] = array(
+					'#type' => 'hidden',
+					'#default_value' => variable_get('pwcs_headerbanner_image', ''),
+				);
+
+				$form['pwcs_headerbanner_text'] = array(
+					'#type' => 'textarea',
+					'#default_value' => variable_get('pwcs_headerbanner_text', ''),
+					'#title' => t('Banner Text / Welcome Text'),
+					'#description' => t('Banner Text / Welcome Text will show on bannar image'),
+				);
+
+				$banner_text_poositions = array('left'=>'Left', 'center'=>'Center', 'right'=>'Right');
+				$form['pwcs_headerbanner_text_position'] = array(
+					'#type' => 'radios',
+					'#options' => $banner_text_poositions,
+					'#default_value' => variable_get('pwcs_headerbanner_text_position', 'left'),
+					'#title' => t('Text Position'),
+				);
+			break;
+
+
+			case 'welcome_text':
+				$form['pwcs_welcome_text_title'] = array(
+					'#type' => 'textfield',
+					'#default_value' => variable_get('pwcs_welcome_text_title', 'Welcome to our Online Store'),
+					'#title' => t('Welcome Text Title'),
+					'#description' => t('Title of Welcome text'),
+				);
+				$form['pwcs_welcome_text_content'] = array(
+					'#type' => 'textarea',
+					'#default_value' => variable_get('pwcs_welcome_text_content', 'Welcome to our online store. We hope and wish you a nice and comfortable experience with our online presentation.'),
+					'#title' => t('Welcome Text Content'),
+					'#description' => t('Content for Welcome Text'),
+				);
+
+			break;
+			case 'image_slideshow':
+
+				$form['pwcs_image_slideshow_width'] = array(
+					'#type' => 'textfield',
+					'#default_value' => variable_get('pwcs_image_slideshow_width', '650'),
+					'#title' => t('Width'),
+					'#size'=> 8,
+					'#field_suffix' => 'px',
+				);
+				$form['pwcs_image_slideshow_height'] = array(
+					'#type' => 'textfield',
+					'#default_value' => variable_get('pwcs_image_slideshow_height', '250'),
+					'#title' => t('Height'),
+					'#size'=> 8,
+					'#field_suffix' => 'px',
+				);
+				$poositions = array('left'=>'Left', 'center'=>'Center', 'right'=>'Right');
+				$form['pwcs_image_slideshow_position'] = array(
+					'#type' => 'radios',
+					'#options' => $poositions,
+					'#default_value' => variable_get('pwcs_image_slideshow_position', 'center'),
+					'#title' => t('Position'),
+				);
+				$imageslideshow_nid = _pwcs_getnid_from_path('siteadmin/imageslideshow');
+				$form['pwcs_image_slideshow_tips'] = array(
+					'#type' => 'markup',
+					'#value' => '<div class="messages">'.t('NB: To Add/Edit/Delete Images, Go To !siteadmin-slideshow', array('!siteadmin-slideshow' => l(t('Siteadmin Slideshow'), 'node/'.$imageslideshow_nid.'/edit'))).'</div>',
+				);
+
+			break;
+
+			case 'fatured_products':
+				$form['pwcs_fatured_products_block_amount'] = array(
+					'#type' => 'textfield',
+					'#title' => t('Number of products will be shown'),
+					'#default_value' => variable_get('pwcs_fatured_products_block_amount', 10),
+				);
+
+				//variable_get('pwcs_fatured_products_block_theme', 'spv_normal')
+				$form['pwcs_psv_options'] = array('#type' => 'fieldset', '#title' => t('Product View Settings for Featured Products'));
+				$form['pwcs_psv_options']['#prefix'] = '<div id="pwcs_psv_options">';
+				$form['pwcs_psv_options']['#suffix'] = '</div>';
+				$form['pwcs_psv_options']['#collapsible'] = 1;
+				$form['pwcs_psv_options']['#collapsed'] = 1;
+				$product_block_themes = pwcs_product_single_view_options();
+				$form['pwcs_psv_options']['pwcs_fatured_products_block_theme'] = array(
+					'#type' => 'radios',
+					'#options' => $product_block_themes,
+					'#title' => t('Theme '),
+					'#description' => t('Selected theme will shown for featured products block'),
+					'#default_value' => variable_get('pwcs_fatured_products_block_theme', 'spv_normal'),
+				);
+
+			break;
+
+			case 'topsearch_keywords':
+				$form['pwcs_topsearch_keywords_themetype'] = array(
+					'#type' => 'radios',
+					'#options' => array(0=>t('List Type'), 1=>t('Cloud Type')),
+					'#title' => t('Top Search Theme Type'),
+					'#default_value' => variable_get('pwcs_topsearch_keywords_themetype', 1),
+				);
+			break;
+
+		}
+		return $form;
+	}
+
+	else if ($op == 'save') {
+		switch($delta)
+		{
+			case 'homepage_products':
+				variable_set('pwcs_homepage_products_block_amount', $edit['pwcs_homepage_products_block_amount']);
+				variable_set('pwcs_homepage_products_block_featured', $edit['pwcs_homepage_products_block_featured']);
+				variable_set('pwcs_homepage_products_block_theme', $edit['pwcs_homepage_products_block_theme']);
+			break;
+
+			case 'header_banner':
+				variable_set('pwcs_headerbanner_image', $edit['pwcs_headerbanner_image']);
+				variable_set('pwcs_headerbanner_text_position', $edit['pwcs_headerbanner_text_position']);
+				variable_set('pwcs_headerbanner_text', $edit['pwcs_headerbanner_text']);
+			break;
+
+			case 'welcome_text':
+				variable_set('pwcs_welcome_text_title', $edit['pwcs_welcome_text_title']);
+				variable_set('pwcs_welcome_text_content', $edit['pwcs_welcome_text_content']);
+			break;
+
+			case 'image_slideshow':
+				//variable_set('pwcs_image_slideshow_image', $edit['pwcs_image_slideshow_image']);
+				variable_set('pwcs_image_slideshow_width', $edit['pwcs_image_slideshow_width']);
+				variable_set('pwcs_image_slideshow_height', $edit['pwcs_image_slideshow_height']);
+				variable_set('pwcs_image_slideshow_position', $edit['pwcs_image_slideshow_position']);
+			break;
+
+			case 'fatured_products':
+				variable_set('pwcs_fatured_products_block_amount', $edit['pwcs_fatured_products_block_amount']);
+				variable_set('pwcs_fatured_products_block_theme', $edit['pwcs_fatured_products_block_theme']);
+			break;
+
+			case 'topsearch_keywords':
+				variable_set('pwcs_topsearch_keywords_themetype', $edit['pwcs_topsearch_keywords_themetype']);
+			break;
+		}
+	}
+
+	else if ($op == 'view')
+	{
+		switch($delta)
+		{
+			case 'sidebar_category_menu':
+				$block['subject'] = t('Category');
+				$block['content'] = pwcs_category_menu();
+			break;
+
+			case 'sidebar_listing_menu':
+				$block['subject'] = t('Listing');
+				$block['content'] = pwcs_listing_menu();
+			break;
+
+			case 'sidebar_manufacture_block':
+				$block['subject'] = t('Manufacturers');
+				$block['content'] = pwcs_manufacture_menu_block();
+			break;
+
+			case 'homepage_products':
+				$block['content'] = pwcs_public_products_block();
+			break;
+
+			case 'siteadmin_navigation':
+					$block['content'] = pwcs_siteadmin_navigation();
+			break;
+
+			case 'siteadmin_navigation_top':
+					$block['content'] = pwcs_siteadmin_navigation_top();
+			break;
+
+			case 'header_banner':
+				$block['content'] = pwcs_header_banner_block();
+			break;
+
+			case 'welcome_text':
+				$block['content'] = pwcs_welcome_text_block();
+			break;
+
+			case 'image_slideshow':
+				$block['content'] = pwcs_image_slideshow_block();
+			break;
+
+			case 'cart_link':
+				$block['content'] = pwcs_cart_block();
+			break;
+
+			case 'fatured_products':
+				$block['subject'] = t('Featured');
+				$block['content'] = pwcs_fatured_products();
+			break;
+
+			case 'sitesearch_input':
+				$block['content'] = pwcs_sitesearch_input_block();
+			break;
+
+			case 'topsearch_keywords':
+				$block['subject'] = t('Top Searches');
+				$block['content'] = pwcs_topsearch_keywords_block();
+			break;
+
+		}
+		return $block;
+	}
+
+}
+
+
+/**
+ * Implementing hook_node_info()
+ * Added by Rasel Kabir
+ */
+function pwcs_node_info()
+{
+  return array(
+    'product' => array(
+      'name' => t('PWC Store Product'),
+      'module' => 'pwcs_product',
+      'description' => t('Content type for PWC Store Product'),
+      'title_label' => t('Product title'),
+      'body_label' => t('Product details')
+    ),
+
+//    'order' => array(
+//      'name' => t('PWC Store Orders'),
+//      'module' => 'pwcs_order',
+//      'description' => t('Content type for PWC Store Orders'),
+//      'title_label' => t('Order title'),
+//      'body_label' => t('Order details')
+//    ),
+
+  );
+}
+
+
+/**
+ * Implementation of hook_nodeapi().
+ * Added by Rasel Kabir
+ */
+function pwcs_nodeapi(&$node, $op, $teaser, $page) {
+  global $user;
+
+  switch ($op) {
+    case 'alter':
+      break;
+    case 'validate':
+      break;
+    case 'presave':
+      break;
+    case 'insert':
+    case 'update':
+      break;
+    case 'delete':
+      break;
+    case 'load':
+      break;
+  }
+}
+
+
+/**
+ * Implementing hook_form_alter()
+ * Added by Rasel Kabir
+ */
+function pwcs_form_alter(&$form, $form_state, $form_id)
+{
+	global $user;
+
+	//print_r ($form_id);
+
+	if ($user->uid != 1) {
+		unset($form['locale']);
+	}
+
+	if(isset($form['buttons']['preview']))
+		$form['buttons']['preview']['#type'] = 'hidden';
+
+	if(isset($form['preview']))
+		$form['preview']['#type'] = 'hidden';
+
+	if ($user->uid != 1) {
+		$form['submit']['#prefix'] = '<div style="height:10px;"> </div>';
+		$form['submit']['#suffix'] = '';
+	}
+
+	switch ($form_id)
+	{
+		case 'user_login':
+			unset($form['name']['#description']);
+			unset($form['pass']['#description']);
+		break;
+
+		case 'user_register':
+		case 'user_profile_form':
+		case 'user_edit':
+
+			//unset($form['account']);
+			if ($user->uid != 1) {
+				unset($form['account']['status']);
+				unset($form['timezone']);
+				unset($form['delete']);
+			}
+
+		break;
+
+		case 'block_admin_display_form':
+
+			if ($user->uid != 1) {
+
+				//$siteadmin_block_page = '<a href="javascript: history.go(-1); reload();"></a>';
+				$back_to_admin_panel = l('Admin Panel','siteadmin/theme', array('attributes'=>array('class'=>'return')));
+				$add_new_block = l('Add Block','admin/build/block/add', array('attributes'=>array('class'=>'addblock')));
+
+				$js='$(function() {'.
+							'$("body").append('.
+							'\'<div class="siteadmin-floating-navigation">'.
+							'<div class="bg-top"></div>'.
+							'<div class="bg-mid">'.
+							$back_to_admin_panel.
+							$add_new_block.
+							'</div>'.
+							'<div class="bg-bottom"></div>'.
+							'</div>\''
+							.');'.
+
+							'$("#content-tabs").hide();'.
+							'$(".help").hide();'.
+						'});';
+				drupal_add_js($js, 'inline', 'footer');
+
+
+			    unset($form['user_0']); //User login
+			    unset($form['user_1']);
+			    unset($form['user_2']);
+			    unset($form['user_3']);
+			    unset($form['menu_admin']);
+			    unset($form['system_0']);
+			    unset($form['comment_0']);
+			    unset($form['statistics_0']);
+			    unset($form['node_0']);
+			    unset($form['menu_primary-links']); //Primary links
+			    unset($form['menu_secondary-links']); //Secondary links
+			    unset($form['pwcs_siteadmin_navigation']);
+			}
+		break;
+
+		case 'block_add_block_form':
+		case 'block_admin_configure':
+
+			if ($user->uid != 1) {
+
+				$form['block_settings']['body_field']['format']['#prefix'] = '<div style="display:none;">';
+				$form['block_settings']['body_field']['format']['#suffix'] = '</div>';
+
+//				$form['block_settings']['title']['#prefix'] = '<div style="display:none;">';
+//				$form['block_settings']['title']['#suffix'] = '</div>';
+
+				$form['user_vis_settings']['#prefix'] = '<div style="display:none;">';
+				$form['user_vis_settings']['#suffix'] = '</div>';
+
+				$form['role_vis_settings']['#prefix'] = '<div style="display:none;">';
+				$form['role_vis_settings']['#suffix'] = '</div>';
+
+//				$form['page_vis_settings']['#prefix'] = '<div style="display:none;">';
+//				$form['page_vis_settings']['#suffix'] = '</div>';
+
+				$form['page_vis_settings']['#collapsed'] = 1;
+				$form['page_vis_settings']['pages']['#description'] = t('Enter one url per line as paths without base url ('.PWCS_STORE_URL.'). ' .
+																		'The \'*\' character is a wildcard. ' .
+																		'Example paths are <em>blog</em> for the blog page ' .
+																		'and <em>blog/*</em> for every personal blog. ' .
+																		'<em>&lt;front&gt;</em> is the front page.'
+																		);
+		}
+
+		break;
+
+		case 'product_node_form':
+
+			if ($user->uid != 1) {
+				//echo '<pre>'.print_r ($form, true).'</pre>';
+
+				$form['menu']['#prefix'] = '<div style="display:none;">';
+				$form['menu']['#suffix'] = '</div>';
+
+				$form['comment_settings']['#prefix'] = '<div style="display:none;">';
+				$form['comment_settings']['#suffix'] = '</div>';
+
+				//Path
+				$form['path']['#prefix'] = '<div id="product_path">';
+				$form['path']['#suffix'] = '</div>';
+				$form['path']['#collapsible'] = 0;
+				$form['path']['#collapsed'] = 0;
+	
+				//Buttons
+				$form['buttons']['#prefix'] = '<div id="product_buttons" class="add_edit_products_buttons">';
+				$form['buttons']['#suffix'] = '</div>';
+				$form['buttons']['#weight'] = -100;
+			}
+
+		break;
+
+		case 'page_node_form':
+			if ($user->uid != 1) {
+			$form['menu']['#weight'] = 29;
+			$form['menu']['#collapsed'] = 0;
+      //unset($form['menu']['parent']['#options']['admin:0']);
+			$form['title']['#title'] = t('Page title');
+			$form['body_field']['body']['#title'] = t('Page Body');
+			$form['body_field']['format']['#prefix'] = '<div style="display:none;">';
+			$form['body_field']['format']['#suffix'] = '</div>';
+			}
+		break;
+
+		case 'system_site_information_settings':
+			if ($user->uid != 1) {
+				unset($form['anonymous']);
+				//unset($form['site_frontpage']);
+			}
+		break;
+
+		case 'imce_upload_form':
+			if ($user->uid != 1) {
+				drupal_set_title('Media Manager');
+			}
+		break;
+
+		case 'system_theme_settings':
+
+			if ($user->uid != 1) {
+
+				drupal_set_title('Theme Configuration');
+				$js='$(function() {
+						$(".tabs").hide();
+						$(".help").hide();
+				});';
+				drupal_add_js($js, 'inline', 'footer');
+
+				//$config_theme_id = $form['#parameters']['2'];
+			  //if ($user->uid > 0 && user_access('is siteadmin')) {
+	  		//  variable_set('theme_default', $config_theme_id);
+			  //}
+//
+//				if($form['#parameters']['2'] == 'pwcs_default') {
+//					$form_theme_specific = array();
+//					unset($form['theme_specific']['tnt_container']['general_settings']['theme_grid_config']['theme_grid']);
+//					unset($form['theme_specific']['tnt_container']['general_settings']['theme_grid_config']['fluid_grid_width']);
+//					$form_theme_specific[] = $form['theme_specific']['tnt_container']['general_settings']['theme_grid_config'];
+//
+//					//$form['theme_specific']['tnt_container']['general_settings']['theme_font_config']['theme_font_config_font']['theme_font']['#type'] = 'select';
+//					$form['theme_specific']['tnt_container']['general_settings']['theme_font_config']['theme_font_config_size']['theme_font_size']['#type'] = 'select';
+//
+//					$form_theme_specific[] = $form['theme_specific']['tnt_container']['general_settings']['theme_font_config']['theme_font_config_font'];
+//					$form_theme_specific[] = $form['theme_specific']['tnt_container']['general_settings']['theme_font_config']['theme_font_config_size'];
+//					$form_theme_specific[] = $form['theme_specific']['tnt_container']['general_settings']['navigation']['breadcrumb'];
+//					unset($form['theme_specific']);
+//					foreach ($form_theme_specific as $k=>$v){
+//						$form_theme_specific[$k]['#collapsed'] = 0;
+//					}
+//					$form['theme_specific'] = $form_theme_specific;
+//					$form['buttons']['#weight'] = 100;
+//				}
+
+			}
+		break;
+
+		case 'image_slideshow_node_form':
+
+			if ($user->uid != 1) {
+				if ($form['#node']->path == 'siteadmin/imageslideshow') {
+
+					$js='$(function() {
+							$("#center ul.tabs").hide();
+							$("#center div.help").hide();
+					});';
+					drupal_add_js($js, 'inline', 'footer');
+
+
+					//echo '<pre>'.print_r ($form['field_slideshow_images'], true).'</pre>';
+
+					$form['title']['#prefix'] = '<div style="display:none;">';
+					$form['title']['#suffix'] = '</div>';
+
+					$form['body_field']['#prefix'] = '<div style="display:none;">';
+					$form['body_field']['#suffix'] = '</div>';
+
+					$form['path']['#prefix'] = '<div style="display:none;">';
+					$form['path']['#suffix'] = '</div>';
+
+					$form['field_slideshow_images']['field_slideshow_images_add_more']['#value'] = t('Add Another Image');
+
+					$form['buttons']['#prefix'] = '<div style="margin: 20px 0; padding: 10px 0; border-top: 1px solid #ddd;">';
+					$form['buttons']['#suffix'] = '</div>';
+				}
+			}
+			
+		break;
+
+		case 'comment_form':
+
+			if ($user->uid != 1) {
+				if($form['nid']['#value']) {
+					$type = db_result(db_query('SELECT type from {node} WHERE nid = %d', $form['nid']['#value']));
+					
+					if($type == 'product') {
+						
+						$form['#redirect'] = array('node/'.$form['nid']['#value']);
+
+						$form['homepage']['#prefix'] = '<div style="display:none;">';
+						$form['homepage']['#suffix'] = '</div>';
+
+						$form['comment_filter']['format']['#prefix'] = '<div style="display:none;">';
+						$form['comment_filter']['format']['#suffix'] = '</div>';
+	
+						$form['submit']['#value'] = t('Add Review');
+						$form['submit']['#prefix'] = '<div class="review_button">';
+						$form['submit']['#suffix'] = '</div>';
+					}
+				}					
+			}
+			
+		break;
+
+		case 'fivestar_settings':
+
+			if ($user->uid != 1) {
+
+				$form['widget']['fivestar_color_widget']['#prefix'] = '<div style="display:none;">';
+				$form['widget']['fivestar_color_widget']['#suffix'] = '</div>';
+				$form['color']['#prefix'] = '<div style="display:none;">';
+				$form['color']['#suffix'] = '</div>';
+			}
+			
+		break;
+
+		case 'menu_overview_form':
+
+			drupal_set_title(t('Site Menu Items'));
+			//print_r ($form);
+			if ($user->uid != 1) {
+				$js='$(function() {
+						$("#tabs-wrapper ul.tabs li:nth-child(3)").hide();
+						$("table#menu-overview thead th:nth-child(3)").hide();
+						$("table#menu-overview tbody td:nth-child(3)").hide();
+				});';
+				drupal_add_js($js, 'inline', 'footer');
+			}
+			
+		break;
+
+		case 'menu_edit_item':
+
+			if ($user->uid != 1) {
+				$js='$(function() {
+						$("#tabs-wrapper ul.tabs li:nth-child(3)").hide();
+				});';
+				drupal_add_js($js, 'inline', 'footer');
+
+				$form['menu']['description']['#prefix'] = '<div style="display:none;">';
+				$form['menu']['description']['#suffix'] = '</div>';
+				$form['menu']['enabled']['#prefix'] = '<div style="display:none;">';
+				$form['menu']['enabled']['#suffix'] = '</div>';
+				$form['menu']['expanded']['#prefix'] = '<div style="display:none;">';
+				$form['menu']['expanded']['#suffix'] = '</div>';
+				$form['menu']['parent']['#prefix'] = '<div style="display:none;">';
+				$form['menu']['parent']['#suffix'] = '</div>';
+				$form['menu']['weight']['#prefix'] = '<div style="display:none;">';
+				$form['menu']['weight']['#suffix'] = '</div>';
+			}
+			
+		break;
+
+	}
+}
+
+/**
+ * Implementation of hook_theme
+ * Added by Rasel Kabir
+ */
+function pwcs_theme() {
+  $items = array();
+
+  $items['pwcs_categorylist_sort_form'] = array(
+    'arguments' => array('form' => NULL),
+  );
+  $items['pwcs_listing_sort_form'] = array(
+    'arguments' => array('form' => NULL),
+  );
+  $items['pwcs_siteadmin_groups_form'] = array(
+    'arguments' => array('form' => NULL),
+  );
+  $items['pwcs_siteadmin_product_order_form'] = array(
+    'arguments' => array('form' => NULL),
+  );
+  $items['pwcs_siteadmin_att_groups_form'] = array(
+    'arguments' => array('form' => NULL),
+  );
+
+  $items['pwcs_siteadmin_block_form'] = array(
+    'arguments' => array('form' => NULL),
+  );
+
+/*  $items['macromaker_popup'] = array(
+    'arguments' => array('items' => array()),
+  );
+*/
+  return $items;
+}
+
+/** *********************** **/
+/** Custom Functions Starts **/
+/** *********************** **/
+
+
+/**
+ * Settings page for module
+ * function for menu item 'admin/settings/pwcs'
+ * Added by Rasel Kabir
+ */
+function pwcs_admin_settings() {
+
+	// Creating Siteadmin menu when admin goes this page
+	//_pwcs_siteadmin_menu_item_build();
+	$output = '';
+	$output .= drupal_get_form('pwcs_admin_basic_settings');
+	return $output;
+}
+
+/**
+ * Creating Siteadmin menu items
+ * Added by Rasel Kabir
+ */
+//function _pwcs_siteadmin_menu_item_build(){
+//
+//	$item['menu_name'] = 'pwcs-siteadmin'; // Default is navigation.
+//	$item['link_title'] = 'Products';
+//	$item['options'] = array(); // An array of options, see l() for more.
+//	$item['mlid'] = '579'; // Set to an existing value, or 0 or NULL to insert a new link.
+//	//$item['plid'] = 0; // The mlid of the parent.
+//	$item['link_path'] = 'siteadmin/products'; // The path of the relevant router item.
+//	$item['router_path'] = 'siteadmin/products'; // The path of the relevant router item.
+//	$item['module'] = 'pwcs';
+//	//menu_link_save($item);
+//
+//}
+
+/**
+ * FORM for Settings page for module
+ * @return form array for settings page
+ * Added by Rasel Kabir
+ */
+function pwcs_admin_basic_settings() {
+
+	//$form['variable_settings'] = array('#type' => 'fieldset', '#title' => t('Settings'));
+	$form['variable_settings']['pwcs_target_url_cart_apikey'] = array(
+		'#type' => 'textfield',
+		'#title' => t('PWCSTORE API Key'),
+		'#description' => t('API KEY for PWC STORE (Ddefault: <strong>PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=</strong>), NB: never chnage this item, it will be provided by PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_cart_apikey', 'PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['pwcs_target_url_applicationid'] = array(
+		'#type' => 'textfield',
+		'#title' => t('PWCSTORE Application ID'),
+		'#description' => t('Application Id for PWC STORE (Default: <strong>10006</strong>), NB: never chnage this item, it will be provided by PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_applicationid', '10006'),
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['pwcs_pwc_core_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('PWC CORE URL'),
+		'#description' => t('PWC CORE URL  (Default: <strong>https://www.secureinfossl.com/</strong> OR Local: <strong>https://localhost/premiumwebcart/</strong>)'),
+		'#default_value' => variable_get('pwcs_pwc_core_url', 'https://www.secureinfossl.com/') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls'] = array('#type' => 'fieldset', '#title' => t('Target URLs'));
+	//$form['variable_settings']['target_urls']['#collapsible'] = 1;
+	$form['variable_settings']['target_urls']['#collapsed'] = 1;
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_categorylist'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Category List Target URL'),
+		'#description' => t('URL from where PWC Store will fetch all category data of PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_categorylist', 'testapi/categoryList.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_productlist'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Product List Target URL'),
+		'#description' => t('URL from where PWC Store will fetch all product data of PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_productlist', 'testapi/productList.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+	$form['variable_settings']['target_urls']['pwcs_target_url_maufacturerlist'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Manufacturer List Target URL'),
+		'#description' => t('URL from where PWC Store will fetch all Manufacturer data of PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_maufacturerlist', 'api/getManufacturerList.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_addproductfromstore'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Add Product From Store URL'),
+		'#description' => t('Add Product From Store URL to PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_addproductfromstore', 'testapi/addProductFromStore.html'),
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_addtocart'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Add To Cart Target URL'),
+		'#description' => t('URL from where PWC Store will do the functionality of add to cart at PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_addtocart', 'api/addToCart.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_removefromcart'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Remove From Cart Target URL'),
+		'#description' => t('URL from where PWC Store will do the functionality of remove from cart at PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_removefromcart', 'api/removeFromCart.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_getcartinfo'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Get Cart Info Target URL'),
+		'#description' => t('URL from where PWC Store will get cart info from PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_getcartinfo', 'api/getCartInfo.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['target_urls']['pwcs_target_url_checkout'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Check Out URL'),
+		'#description' => t('Check Out URL to PWC Core'),
+		'#default_value' => variable_get('pwcs_target_url_checkout', 'myCheckout/<#order tempid#>/<#token#>.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+	$form['variable_settings']['target_urls']['pwcs_target_url_basicSettings'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Merchant Basic Settings Information API URL'),
+		'#description' => t('Ex. currency, currencysymbol, productidprefix'),
+		'#default_value' => variable_get('pwcs_target_url_basicSettings', 'testapi/basicSettings.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+	$form['variable_settings']['target_urls']['pwcs_target_url_categoryorderupdate'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Category Order Update URL'),
+		'#description' => t('This will help to change the Category Order at a time'),
+		'#default_value' => variable_get('pwcs_target_url_categoryorderupdate', 'api/saveCategoryOrder.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+	$form['variable_settings']['target_urls']['pwcs_target_url_attributesinfo'] = array(
+		'#type' => 'textfield',
+		'#title' => t(PWCS_ATTRIBUTE_GROUP_NAME.' & '. PWCS_ATTRIBUTE_NAME.' API URL'),
+		'#description' => t('This will pull '.PWCS_ATTRIBUTE_GROUP_NAME.' & '. PWCS_ATTRIBUTE_NAME.' information from PremiumWebCart for the Merchant respectively'),
+		'#default_value' => variable_get('pwcs_target_url_attributesinfo', 'testapi/productOption.html') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['searchengine_ping_urls'] = array('#type' => 'fieldset', '#title' => t('Search Engine Ping URL'));
+	$form['variable_settings']['searchengine_ping_urls']['#collapsed'] = 1;
+
+	$form['variable_settings']['searchengine_ping_urls']['pwcs_google_ping_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Google Ping URL'),
+		'#description' => t('This is the URL where our store app will submit sitemap.xml to this search engine whenever it will be updated & if the auto sitemap creation is enabled from your admin panel'),
+		'#default_value' => variable_get('pwcs_google_ping_url', 'http://www.google.com/webmasters/tools/ping?sitemap#SITEMAP_URL') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['searchengine_ping_urls']['pwcs_yahoo_ping_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Yahoo Ping URL'),
+		'#description' => t('This is the URL where our store app will submit sitemap.xml to this search engine whenever it will be updated & if the auto sitemap creation is enabled from your admin panel'),
+		'#default_value' => variable_get('pwcs_yahoo_ping_url', 'http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=SitemapWriter&url=#SITEMAP_URL') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['searchengine_ping_urls']['pwcs_ask_ping_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('ASK.com Ping URL'),
+		'#description' => t('This is the URL where our store app will submit sitemap.xml to this search engine whenever it will be updated & if the auto sitemap creation is enabled from your admin panel'),
+		'#default_value' => variable_get('pwcs_ask_ping_url', 'http://submissions.ask.com/ping?sitemap=#SITEMAP_URL') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['searchengine_ping_urls']['pwcs_bing_ping_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Bing Ping URL'),
+		'#description' => t('This is the URL where our store app will submit sitemap.xml to this search engine whenever it will be updated & if the auto sitemap creation is enabled from your admin panel'),
+		'#default_value' => variable_get('pwcs_bing_ping_url', 'http://www.bing.com/webmaster/ping.aspx?siteMap=#SITEMAP_URL') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['variable_settings']['enable_disable_features'] = array('#type' => 'fieldset', '#title' => t('Enable Features'));
+	$form['variable_settings']['enable_disable_features']['#collapsed'] = 1;
+	$form['variable_settings']['enable_disable_features']['pwcs_admin_enable_imageslideshow'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Enable Image Slideshow'),
+		'#description' => '',
+		'#default_value' => variable_get('pwcs_admin_enable_imageslideshow', 0),
+	);
+
+	$form['variable_settings']['dev']['pwcs_dev_debug'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Developer Debug ON/OFF'),
+		'#description' => t('Check to enable debug file write.').' '.l('Click Here To Clean Debug File', 'admin/settings/pwcs/debug_file_clean').'. And '.l('Click Here To View Debug File', PWCS_STORE_URL.'pwcsdebug.txt').'.',
+		'#default_value' => variable_get('pwcs_dev_debug', 1),
+	);
+
+	return system_settings_form($form);
+}
+
+/**
+ * Settings page for Siteadmin
+ * @return form array for siteadmin settings page
+ * Added by Rasel Kabir <shuvro.mist@gmail.com>
+ */
+function pwcs_siteadmin_sitesettings() {
+
+	// Manufacture block settings
+	$form['pwcs_manufacturer_block'] = array('#type' => 'fieldset', '#title' => t('Manufacturer Block Settings'));
+	$form['pwcs_manufacturer_block']['#prefix'] = '<div id="pwcs_manufacturer_block">';
+	$form['pwcs_manufacturer_block']['#suffix'] = '</div>';
+	$form['pwcs_manufacturer_block']['#collapsible'] = 1;
+	$form['pwcs_manufacturer_block']['#collapsed'] = 1;
+	$form['pwcs_manufacturer_block']['pwcs_manufacturer_block_type'] = array(
+		'#type' => 'radios',
+		'#options' => array(0=>t('Random Manufacturer'), 1=>t('Featured Manufacturer')),
+		'#title' => t('Manufacturer block items will be'),
+		'#description' => t('Selected way will be shown in Manufacturer block.').' '.l('Go to this link to EDIT "Featured Manufacturer".', 'siteadmin/manufacturers'),
+		'#default_value' => variable_get('pwcs_manufacturer_block_type', '0'),
+	);
+	$form['pwcs_manufacturer_block']['pwcs_manufacturer_block_item_amount'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Maximum Manufacturer No in Manufacture Block (If random selected)'),
+		'#description' => t('No. of Manufacturer which will be set in Manufacturer Block if the block is enabled.'),
+		'#default_value' => variable_get('pwcs_manufacturer_block_item_amount', '10'),
+	);
+
+	// Product Single View admin settings
+	$form['pwcs_psv_options'] = array('#type' => 'fieldset', '#title' => t('Product View Settings for Category/Listings'));
+	$form['pwcs_psv_options']['#prefix'] = '<div id="pwcs_psv_options">';
+	$form['pwcs_psv_options']['#suffix'] = '</div>';
+	$form['pwcs_psv_options']['#collapsible'] = 1;
+	$form['pwcs_psv_options']['#collapsed'] = 1;
+	$product_block_themes = pwcs_product_single_view_options();
+	$form['pwcs_psv_options']['pwcs_sitesettings_productview_theme'] = array(
+		'#type' => 'radios',
+		'#options' => $product_block_themes,
+		'#title' => t('Product View Theme'),
+		'#description' => t('Selected theme will shown in product search and category page'),
+		'#default_value' => variable_get('pwcs_sitesettings_productview_theme', 'spv_normal'),
+	);
+
+	//Cart settings
+	$form['cart_settings'] = array('#type' => 'fieldset', '#title' => t('Cart Settings'));
+	$form['cart_settings']['#collapsible'] = 1;
+	$form['cart_settings']['#collapsed'] = 1;
+
+	$cart_themes = array('1'=>'Row view', '2'=>'Column based with scrolling effect');
+	$form['cart_settings']['pwcs_sitesettings_cart_theme'] = array(
+		'#type' => 'radios',
+		'#options' => $cart_themes,
+		'#title' => t('Cart Theme'),
+		'#description' => t('Selected theme will shown in cart info modalbox/popup/page'),
+		'#default_value' => variable_get('pwcs_sitesettings_cart_theme', '1') ,
+	);
+
+	$form['cart_settings']['scrollcart'] = array('#type' => 'fieldset', '#title' => t('Cart Settings, If "Column based with scrolling effect" selected'));
+	$form['cart_settings']['scrollcart']['#collapsible'] = 1;
+	$form['cart_settings']['scrollcart']['#collapsed'] = 1;
+
+	$form['cart_settings']['scrollcart']['pwcs_sitesettings_cart_itemamount'] = array(
+		'#type' => 'textfield',
+		'#title' => t('No of Product to be displayed in the Cart'),
+		'#description' => t('No. of Product will be shown in the POPUP cart'),
+		'#default_value' => variable_get('pwcs_sitesettings_cart_itemamount', '4') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$form['cart_settings']['scrollcart']['pwcs_sitesettings_cart_scrollamount'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Scroll Product at a time'),
+		'#description' => t('No. of items will be scrolled when user will click the left / right navigation bar  from POPUP cart'),
+		'#default_value' => variable_get('pwcs_sitesettings_cart_scrollamount', '1') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	$auto_scroll = variable_get('pwcs_sitesettings_cart_autoscroll', '1');
+	$form['cart_settings']['scrollcart']['pwcs_sitesettings_cart_autoscroll'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Auto Scroll'),
+		//'#description' => t('Enable auto scroll for cart items'),
+		'#default_value' => $auto_scroll,
+	);
+
+	$form['cart_settings']['pwcs_sitesettings_cart_relatedproductamount'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Related Products No'),
+		'#description' => t('No of Related Products showing in the Cart'),
+		'#default_value' => variable_get('pwcs_sitesettings_cart_relatedproductamount', '5') ,
+		'#maxlength' => 180,
+		//'#style'=> 'width: 250px;'
+	);
+
+	// Details Page  block settings
+	$form['pwcs_product_detail_page'] = array('#type' => 'fieldset', '#title' => t('Product Details Page Settings'));
+	$form['pwcs_product_detail_page']['#prefix'] = '<div id="pwcs_product_detail_page">';
+	$form['pwcs_product_detail_page']['#suffix'] = '</div>';
+	$form['pwcs_product_detail_page']['#collapsible'] = 1;
+	$form['pwcs_product_detail_page']['#collapsed'] = 1;
+
+	$form['pwcs_product_detail_page']['pwcs_sitesettings_product_detail_show_manufacturer'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Show Manufacturer Tab'),
+		'#description' => t('For Every Single Product View your End User will see Manufacturer Details under Manufacturer Tab'),
+		'#default_value' => variable_get('pwcs_sitesettings_product_detail_show_manufacturer', '1'),
+	);
+
+	$form['pwcs_product_detail_page']['pwcs_sitesettings_product_detail_relatedproducts'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Show Related Products Tab'),
+		'#description' => t('For Every Single Product View your End User will see Manufacturer Details under Manufacturer Tab'),
+		'#default_value' => variable_get('pwcs_sitesettings_product_detail_relatedproducts', '1'),
+	);
+
+	// Product Settings Others
+	$form['pwcs_others_settings'] = array('#type' => 'fieldset', '#title' => t('Product Settings Others'));
+	$form['pwcs_others_settings']['#prefix'] = '<div id="pwcs_others_settings">';
+	$form['pwcs_others_settings']['#suffix'] = '</div>';
+	$form['pwcs_others_settings']['#collapsible'] = 1;
+	$form['pwcs_others_settings']['#collapsed'] = 1;
+
+	$form['pwcs_others_settings']['pwcs_sitesettings_oneclickbuy'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Enable One Click Buy Link'),
+		'#description' => t('To Enable One Click Buy Link For This Site'),
+		'#default_value' => variable_get('pwcs_sitesettings_oneclickbuy', '1'),
+	);
+	$form['pwcs_others_settings']['pwcs_sitesettings_oneclickbuy_text'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Text For One Click Buy Link'),
+		'#description' => t('Set/Change One Click Buy Link Text'),
+		'#default_value' => variable_get('pwcs_sitesettings_oneclickbuy_text', 'One Click Buy'),
+	);
+	$form['pwcs_others_settings']['pwcs_categorypage_products_paging_amount'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Category/Listing Page Paging Amount'),
+		'#description' => t('Paging Amount'),
+		'#default_value' => variable_get('pwcs_categorypage_products_paging_amount', '10'),
+	);
+	$form['pwcs_others_settings']['pwcs_spv_moredetailslink'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Show More Details Link at Product List Page'),
+		'#description' => t('This Will Show More Details Link at Product List Page'),
+		'#default_value' => variable_get('pwcs_spv_moredetailslink', '1'),
+	);
+	$form['pwcs_others_settings']['pwcs_cart_link_title'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Cart Link Title'),
+		'#description' => t('This will show in your cart link.<br>Use variable <b>!amount</b> for total product amount in the cart. And <b>!total_quantity</b> for total quantity amount in each product. <br/>Example: <em>Cart: total !total_quantity items for !amount products</em>'),
+		'#default_value' => variable_get('pwcs_cart_link_title', 'Cart: total !total_quantity items for !amount products'),
+	);
+
+
+	// Product Settings Others
+	$form['pwcs_others_settings']['pwcs_product_saleprice'] = array('#type' => 'fieldset', '#title' => t('Product Sale Price Icon'));
+	$form['pwcs_others_settings']['#prefix'] = '<div id="pwcs_product_saleprice" class="radios-inline">';
+	$form['pwcs_others_settings']['#suffix'] = '</div>';
+	$form['pwcs_others_settings']['pwcs_product_saleprice']['#collapsible'] = 0;
+	$form['pwcs_others_settings']['pwcs_product_saleprice']['#collapsed'] = 0;
+
+	$icon_option = array(''=>'<em>'.t('No Icon').'</em>');
+	$pwcs_salepriceicon_files = file_scan_directory(PWCS_MODULE_IMAGE.'saleprice_icons', '.png');
+	foreach($pwcs_salepriceicon_files as $k=>$v){
+		$saleprice_icon_option[$v->filename] = theme('image', $v->filename, '', '', array('width'=>'auto'), FALSE);
+	}
+	//SALE icon
+	$form['pwcs_others_settings']['pwcs_product_saleprice']['pwcs_product_saleprice_icon_1'] = array(
+		'#type' => 'radios',
+		'#options' => $saleprice_icon_option,
+		'#title' => t('Prodcuts Sell Price Icon for SALE'),
+		'#description' => t('Icon you want to show with your product saleprice of Sale'),
+		'#default_value' => variable_get('pwcs_product_saleprice_icon_1', PWCS_MODULE_IMAGE.'saleprice_icons'.'/saletag1.png'),
+	);
+	//CLEARANCE icon
+	$form['pwcs_others_settings']['pwcs_product_saleprice']['pwcs_product_saleprice_icon_2'] = array(
+		'#type' => 'radios',
+		'#options' => $saleprice_icon_option,
+		'#title' => t('Prodcuts Sell Price Icon for CLEARANCE'),
+		'#description' => t('Icon you want to show with your product saleprice of Clearance'),
+		'#default_value' => variable_get('pwcs_product_saleprice_icon_2', PWCS_MODULE_IMAGE.'saleprice_icons'.'/saletag2.png'),
+	);
+	//CLOSEOUT icon
+	$form['pwcs_others_settings']['pwcs_product_saleprice']['pwcs_product_saleprice_icon_3'] = array(
+		'#type' => 'radios',
+		'#options' => $saleprice_icon_option,
+		'#title' => t('Prodcuts Sell Price Icon for CLOSEOUT'),
+		'#description' => t('Icon you want to show with your product saleprice of Closeout'),
+		'#default_value' => variable_get('pwcs_product_saleprice_icon_3', PWCS_MODULE_IMAGE.'saleprice_icons'.'/saletag3.png'),
+	);
+
+	// Video Settings
+	$form['pwcs_videodisplay_settings'] = array('#type' => 'fieldset', '#title' => t('Video Settings'));
+	$form['pwcs_videodisplay_settings']['#prefix'] = '<div id="pwcs_videodisplay_settings">';
+	$form['pwcs_videodisplay_settings']['#suffix'] = '</div>';
+	$form['pwcs_videodisplay_settings']['#collapsible'] = 1;
+	$form['pwcs_videodisplay_settings']['#collapsed'] = 1;
+
+	$form['pwcs_videodisplay_settings']['pwcs_product_video_showat_productdetails'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Show Video Links At Product Details Page'),
+		'#description' => t('For Every Single Product View your End User will see Videos'),
+		'#default_value' => variable_get('pwcs_product_video_showat_productdetails', '1'),
+	);
+	$icon_option = array(
+				''=>'<em>'.t('No Icon').'</em>', 
+				'auto_thumb'=> theme('image', PWCS_MODULE_IMAGE.'video_thumb_default.jpg', '', '', array('width'=>'auto'), FALSE).' ('.t('Auto Generated Thumbnail').')'
+				);
+	$pwcs_files = file_scan_directory(PWCS_MODULE_IMAGE.'icons', '.*');
+	foreach($pwcs_files as $k=>$v){
+		$icon_option[$v->filename] = theme('image', $v->filename, '', '', array('width'=>'auto'), FALSE).' ('.t('PWCStore Provided Icon').')';
+	}
+	$user_files = file_scan_directory(file_directory_path().'/imagelibrary/icons', '.*');
+	foreach($user_files as $k=>$v){
+		$icon_option[$v->filename] = theme('image', $v->filename, '', '', array('width'=>'auto'), FALSE).' ('.t('Uploaded Icon').')';
+	}
+	$form['pwcs_videodisplay_settings']['pwcs_product_video_icon'] = array(
+		'#type' => 'radios',
+		'#options' => $icon_option,
+		'#title' => t('Prodcuts Video Icon'),
+		'#description' => t('Icon you want to show with your product videos'),
+		'#default_value' => variable_get('pwcs_product_video_icon', ''),
+	);
+	$form['pwcs_videodisplay_settings']['pwcs_product_video_icon_text'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Prodcuts Video Icon Text'),
+		'#description' => t('Text you want to show with your product videos.<br><b>!video_title</b> can be used as a variable of video title.<br>Example: Play Video (!video_title), Play "!video_title" Now'),
+		'#default_value' => variable_get('pwcs_product_video_icon_text', 'Play Video'),
+	);
+
+	// Product Review settings
+	$form['pwcs_productreview_settings'] = array('#type' => 'fieldset', '#title' => t('Product Review Settings'));
+	$form['pwcs_productreview_settings']['#prefix'] = '<div id="pwcs_productreview_settings">';
+	$form['pwcs_productreview_settings']['#suffix'] = '</div>';
+	$form['pwcs_productreview_settings']['#collapsible'] = 1;
+	$form['pwcs_productreview_settings']['#collapsed'] = 1;
+
+	$form['pwcs_productreview_settings']['pwcs_sitesettings_productreview_tab'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Show Product Reviews Tab'),
+		'#description' => t('For Every Single Product View your End User will see Reviews of that Product under Product Reviews Tab'),
+		'#default_value' => variable_get('pwcs_sitesettings_product_detail_productreview', '1'),
+	);
+
+	$form['pwcs_productreview_settings']['pwcs_sitesettings_productreview_approvecomments'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Enable Siteadmin Approval For Product Review'),
+		'#default_value' => variable_get('pwcs_sitesettings_productreview_approvecomments', '1'),
+	);
+	//Set comment permissions for anonymous user = 1
+	if(variable_get('pwcs_sitesettings_productreview_approvecomments', '1') == 1) {
+		pwcs_removepermission('post comments without approval' , 'anonymous user');
+	} else {
+		pwcs_addpermission('post comments without approval' , 'anonymous user');
+	}
+
+	$form['pwcs_productreview_settings']['fivestar_product'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Enable Fivestar rating'),
+		'#description' => t("At Product Reviews Tab You can enable/disbale fivestar rating for each comment. " .
+							"<br />To change the UI of Fivestar got to <strong>!url</strong>", array('!url' => l(t('FIVE STAR SETTINGS'), 'admin/settings/fivestar', array('html' => true, 'query' => 'destination=siteadmin/sitesettings')))),
+		'#default_value' => variable_get('fivestar_product', '1'),
+	);
+
+	$form['bottom']['#type'] = 'item';
+	$form['bottom']['#prefix'] = '';
+	$form['bottom']['#suffix'] = '<div style="padding:10px;"></div>';
+
+	return system_settings_form($form);
+}
+function pwcs_sync()
+{
+	global $user,$finalmsgs;
+	
+
+	$finalmsgs = array();
+
+	cache_clear_all();
+  	drupal_flush_all_caches();
+
+
+	$merchant_id='';
+	$api_key='';
+
+	$sql  = "SELECT * FROM {pwcs_autosync} async";
+	$results = db_query($sql);
+	while($result = db_fetch_object($results))
+	{
+		$merchant_id         = $result->merchantid;
+		$api_key             = $result->apisignature;
+		$merchantfirstname   = $result->merchantfirstname;
+		$merchantlastname    = $result->merchantlastname;
+		$merchantemail       = $result->merchantemail;
+		$merchantcompanyname = $result->merchantcompanyname;
+		$merchantwebaddress  = $result->merchantwebaddress;
+		$merchantsubdomain   = $result->merchantsubdomain;
+	}
+
+	
+	if ( (!empty($merchant_id)) && (!empty($api_key)) )
+	{
+		
+		syncBasicSettings($merchant_id, $api_key);
+		syncCategory($merchant_id, $api_key);
+		syncListing($merchant_id, $api_key);
+		syncProducts($merchant_id, $api_key);
+		syncAttributes($merchant_id, $api_key);
+		syncManufacturer($merchant_id, $api_key);
+		syncProductsWithListing();
+		pwcs_update_listing_table();
+	}
+	
+	if (!empty($merchantsubdomain))
+	variable_set('file_directory_path', 'sites/'.$merchantsubdomain.'.pwcstores.com/files');
+
+	if (!empty($merchantcompanyname))
+	variable_set('site_name', $merchantcompanyname.' Store');
+
+	if (!empty($merchantemail))
+	variable_set('site_mail', $merchantemail);
+
+	if(!empty($merchantcompanyname))
+	variable_set('site_footer', 'copyright @ '.date('Y').', '.$merchantcompanyname.'');
+	else
+	variable_set('site_footer', 'copyright @ '.date('Y').', Premium Web Cart Inc.');
+
+	if(!empty($merchantlastname))
+		$merchantusername = strtolower($merchantlastname);
+	else if(!empty($merchantfirstname))
+		$merchantusername = strtolower($merchantfirstname);
+	else
+		$merchantusername = 'demo';
+
+	if(!empty($merchantlastname))
+		$merchantname = $merchantlastname;
+	else if(!empty($merchantfirstname))
+		$merchantname = $merchantfirstname;
+	else
+		$merchantname = 'Merchant';
+
+	$updateemail = db_query("UPDATE {users} SET name='".$merchantusername."', mail='".$merchantemail."',init='".$merchantemail."',merchant_enc_id='".$merchant_id."',site_api_key='".$api_key."' WHERE uid = '2'");
+
+	
+	
+	$message = array(
+	  'to' => $merchantemail,
+	  'subject' => t('Your PWC Store Account has been Created'),
+	  'body' => 'Dear '.$merchantname.'<br/><br/> Your Store Account has been Created Successfully.<br/><br/>Your Store URL: http://'.$merchantsubdomain.'.pwcstores.com/<br/><br/><br/>Your Store Admin URL: http://'.$merchantsubdomain.'.pwcstores.com/user<br/><br/>User Name: '.$merchantusername.'<br/>Password: 654321<br/><br/><br/>Thanks<br/>Premium Web Cart Inc. Team',
+	  'headers' => array(
+          'From' => 'webmaster@pwcart.com',
+          'MIME-Version' => '1.0',
+          'Content-Type' => 'text/html;charset=utf-8',),
+          'Reply-To' => 'webmaster@pwcart.com',
+	);
+
+	drupal_mail_send($message);
+	
+	$message = array(
+	  'to' => 'a.r.zerin@athena-soft.com',
+	  'subject' => t('A Merchant PWC Store Account has been Created'),
+	  'body' => 'Dear ZERIN<br/> Merchant Name: '.$merchantname.'<br/><br/> Merchant Store Account has been Created Successfully.<br/><br/>Merchant Store URL: http://'.$merchantsubdomain.'.pwcstores.com/<br/><br/><br/>Merchant Store Admin URL: http://'.$merchantsubdomain.'.pwcstores.com/user<br/><br/>User Name: '.$merchantusername.'<br/>Password: 654321<br/><br/><br/>Thanks<br/>Premium Web Cart Inc. Team',
+	  'headers' => array(
+          'From' => 'webmaster@pwcart.com',
+          'Reply-To' => 'webmaster@pwcart.com',
+          'MIME-Version' => '1.0',
+          'Content-Type' => 'text/html;charset=utf-8',),
+	);
+
+	drupal_mail_send($message);		
+	
+
+
+	
+	$message = array(
+	  'to' => 'a.r.zerin@athena-soft.com',
+	  'subject' => t('A PWC Store Account has been Created'),
+	  'body' => 'Dear '.$merchantname.'<br/><br/> Your Store Account has been Created Successfully.<br/><br/>Your Store URL: http://'.$merchantsubdomain.'.pwcstores.com/<br/><br/><br/>Your Store Admin URL: http://'.$merchantsubdomain.'.pwcstores.com/user<br/><br/>User Name:'.$merchantusername.'<br/>Password:654321<br/><br/><br/>Thanks<br/>Premium Web Cart Inc. Team',
+	  'headers' => array(
+          'From' => 'webmaster@pwcart.com',
+          'Reply-To' => 'webmaster@pwcart.com',
+          'MIME-Version' => '1.0',
+          'Content-Type' => 'text/html;charset=utf-8',),
+	);
+
+	drupal_mail_send($message);	
+
+	die('DONE');
+}
+/**
+ * API Function
+ *
+ * This function is called whenever any product is created or updated in PWCCORE
+ * This function also get calls whenver any category is created or updated in PWCCORE
+ *
+ * @todo Currently we do not delete anything
+ *       when a product or category will be deleted on PWCCORE
+ *
+ * @author A.R. ZERIN <a.r.zerin@gmail.com>
+ * @version 1.0
+ * @copyright
+ * @package PWC Store
+ * @link http://project_url/api/
+ * @example http://www.pwcstores.com/api/
+ * @access public
+ * @param array [$type]
+ * @see  $items['api']
+ *
+ * @global array $user
+ *
+ * @usedby api
+ *
+ * @last-modified on 26 October, 2010 by A.R. ZERIN <a.r.zerin@gmail.com>
+ *
+ * @return NULL, nothing to return
+ *
+ */
+function pwcs_api($type = NULL){
+
+	pwcs_debug_file_write($_REQUEST, true);
+
+	global $user;
+	$entity = isset($_REQUEST['entity']) ? $_REQUEST['entity'] : '';
+	$status = isset($_REQUEST['status']) ? $_REQUEST['status'] : '';
+
+	switch ($entity)
+	{
+		case 'product':     //If notification comes for Product
+
+	    if($_POST['status'] == 'created' || $_POST['status'] == 'updated' || $_POST['status'] == 'deleted')
+	    {
+    	//Fetching all the data from POST Notification (Start)
+        $product_row_id        = $_POST['product_row_id']        ? $_POST['product_row_id']        : '';
+        $product_short_desc    = $_POST['shortDesc']             ? $_POST['shortDesc']             : '';
+		$product_long_desc     = $_POST['longDesc']              ? $_POST['longDesc']              : '';
+		$product_manufac_info  = $_POST['manufactureInfo']       ? $_POST['manufactureInfo']       : '';
+		$product_manufac_id    = $_POST['manufacturer_id']       ? $_POST['manufacturer_id']       : 0;
+        $product_link_id       = $_POST['link_id']               ? $_POST['link_id']               : '';
+        $product_name          = $_POST['product_name']          ? $_POST['product_name']          : '';
+        $product_sku           = $_POST['product_sku']           ? $_POST['product_sku']           : '';
+        $product_category_id   = $_POST['category_id']           ? $_POST['category_id']           : '0';
+        $product_price         = $_POST['price']                 ? $_POST['price']                 : '0.00';
+        $regular_buy_link      = $_POST['regular_buy_link']      ? $_POST['regular_buy_link']      : '';
+        $one_click_buy_link    = $_POST['one_click_buy_link']    ? $_POST['one_click_buy_link']    : '';
+        $p_created_on          = $_POST['created_on']            ? $_POST['created_on']            : '0000-00-00';
+        $p_modified_on         = $_POST['modified_on']           ? $_POST['modified_on']           : '0000-00-00';
+        $product_image         = $_POST['product_image']         ? $_POST['product_image']         : '';
+        
+        $enable_sales_price    = $_POST['enable_sales_price']    ? $_POST['enable_sales_price']    : 0;
+        $product_sale_price    = $_POST['product_sale_price']    ? $_POST['product_sale_price']    : 0;
+        $sale_tag_icon         = $_POST['sale_tag_icon']         ? $_POST['sale_tag_icon']         : 0;
+        $sale_price_start_date = $_POST['sale_price_start_date'] ? strtotime($_POST['sale_price_start_date']) : 0;
+        $sale_price_end_date   = $_POST['sale_price_end_date']   ? strtotime($_POST['sale_price_end_date'])   : 0;
+    	//Fetching all the data from POST Notification (End)
+
+
+        //If there is not product_row_id, product_name, regular buy link & one click buy link then
+        //we will not process
+        if($product_row_id && $product_link_id && $product_name && $regular_buy_link && $one_click_buy_link)
+        {
+            // We have received notification after a product has been updated in PWCCORE
+            if($_POST['status'] == 'updated')
+            {
+        	    //We are collecting node value for existing product from PWCSTORE
+        	    $product_nid = db_result(db_query('SELECT nid FROM {pwcs_product} WHERE pwc_product_row_id = %d', $product_row_id));
+
+            	    $node = node_load($product_nid);
+				    $node->title                = stripslashes(mysql_escape_string($product_name));
+				    $node->body                 = '';
+				    $node->product_name         = stripslashes(mysql_escape_string($product_name));
+				    $node->teaser               = $product_short_desc;
+				    $node->body                 = $product_long_desc;
+				    $node->product_manufacture  = $product_manufac_info;
+				    $node->manufacturer_id      = $product_manufac_id;
+				    $node->pwc_product_row_id   = $product_row_id;
+				    $node->product_link_id      = $product_link_id;
+				    $node->product_sku          = $product_sku;
+				    $node->pwc_category_id      = $product_category_id;
+				    $node->price          	    = $product_price;
+				    $node->regular_buy_link     = $regular_buy_link;
+				    $node->one_click_buy_link   = $one_click_buy_link;
+				    //$node->product_image_path = $product_image;
+				    $node->modified_on          = time();
+				    $node->is_sync          	= 1;
+				    $node->changed         	    = time();
+
+					$node->sync_api          	= 1; // not for DB, status flag to detect node_save
+
+					$node->issalespriceactive  = $enable_sales_price; 
+					$node->salesprice          = $product_sale_price; 
+					$node->salestag            = $sale_tag_icon; 
+					$node->salepricestartdate  = $sale_price_start_date; 
+					$node->salepriceenddate    = $sale_price_end_date; 
+	
+
+					node_save($node);
+					pwcs_update_listing_table();
+					pwcs_make_order_table();
+            }//End of if($_POST['status'] == 'updated')
+
+            // We have received notification after a new product has been created in PWCCORE
+            if($_POST['status'] == 'created')
+            {
+					    $node = new stdClass();
+					    $node->uid                  = $user->uid;
+					    $node->type                 = 'product';
+					    $node->title                = stripslashes(mysql_escape_string($product_name));
+					    $node->product_name         = stripslashes(mysql_escape_string($product_name));
+					    $node->teaser               = $product_short_desc;
+					    $node->body                 = $product_long_desc;
+					    $node->product_manufacture  = $product_manufac_info;
+					    $node->manufacturer_id      = $product_manufac_id;
+					    $node->pwc_product_row_id   = $product_row_id;
+					    $node->product_link_id      = $product_link_id;
+					    $node->product_sku          = $product_sku;
+					    $node->pwc_category_id      = $product_category_id;
+					    $node->price          	    = $product_price;
+					    $node->regular_buy_link     = $regular_buy_link;
+					    $node->one_click_buy_link   = $one_click_buy_link;
+					    //$node->product_image_path   = $product_image;
+					    $node->created_on           = time();
+					    $node->modified_on          = time();
+					    $node->is_sync          	= 1;
+					    $node->changed         	    = time();
+
+					    $node->sync_api          	= 1; // not for DB, status flag to detect node_save
+					    
+						$node->issalespriceactive  = $enable_sales_price; 
+						$node->salesprice          = $product_sale_price; 
+						$node->salestag            = $sale_tag_icon; 
+						$node->salepricestartdate  = $sale_price_start_date; 
+						$node->salepriceenddate    = $sale_price_end_date; 
+					    
+					    
+			    		node_save($node);
+			    		pwcs_update_listing_table();
+			    		pwcs_make_order_table();
+            }//End of if($_POST['status'] == 'created')
+        }//End of  if($product_row_id && $product_link_id && $product_name && $regular_buy_link && $one_click_buy_link)
+   	 	if($_POST['status'] == 'deleted')
+    	{
+    	  	$node_id =  pwcs_get_product_nid($product_row_id);
+    	  	if($node_id >0)
+    	  	node_delete($node_id);
+			$sql = " DELETE FROM {pwcs_product} ".
+		    	   " WHERE pwc_product_row_id	 = '%d' LIMIT 1";
+	        db_query($sql,$product_row_id);
+    	  	pwcs_make_order_table();
+    	 }
+    	}//if($_POST['status'] == 'created' || $_POST['status'] == 'updated' || $_POST['status'] == 'deleted')
+
+		break;
+
+		case 'category': //If notification comes for Category
+
+	    if($_POST['status'] == 'created' || $_POST['status'] == 'updated')
+	    {
+	        $category_id         = $_POST['category_id']           ? $_POST['category_id']            : '';
+	        $category_title      = $_POST['category_description']  ? $_POST['category_description']   : '';
+	        $parent_category_id  = $_POST['parent_category_id']    ? $_POST['parent_category_id']     : 0;
+	        $category_level      = $_POST['level']                 ? $_POST['level']                  : 0;
+	        $has_child           = $_POST['has_child']             ? $_POST['has_child']              : 0;
+	        $is_editable         = $_POST['is_editable']           ? $_POST['is_editable']            : 1;
+	        $created_on          = $_POST['created_on']            ? $_POST['created_on']             : time();
+	        $modified_on         = $_POST['modified_on']           ? $_POST['modified_on']            : time();
+
+	            // We have received notification after a new category has been created in PWCCORE
+	            if($_POST['status'] == 'created')
+	            {
+					$category=array();
+					$category['category_title']     = stripslashes(mysql_escape_string($category_title));
+					$category['parent_category_id'] = $parent_category_id;
+					$category['weight']             = 0;
+					$category['created_on']         = $created_on;
+
+					$result = db_query("INSERT INTO {pwcs_category}" .
+							" (`pwc_category_id`, `category_title`,`parent_category_id`,`weight`,`created_on`)" .
+							" VALUES (%d, '%s', %d, %d, %d)",
+							$category_id, $category_title, $parent_category_id, 0, $created_on
+					);
+					$result = db_query("INSERT INTO {pwcs_listings}" .
+							" (`pwc_category_id`, `category_title`,`parent_category_id`,`category_type`, `is_editable`,`weight`,`created_on`)" .
+							" VALUES (%d, '%s', %d, %d, %d, %d, %d)",
+							$category_id, $category_title, $parent_category_id, 0, 1, 0, $created_on
+					);
+					pwcs_update_listing_table();
+					pwcs_make_order_table();
+	            }//End of if($_POST['status'] == 'created')
+
+	            // We have received notification after an existing category has been updated in PWCCORE
+	            if($_POST['status'] == 'updated')
+	            {
+					$category=array();
+					$category['category_title']      = stripslashes(mysql_escape_string($category_title));
+					$category['parent_category_id']  = $parent_category_id;
+					$category['weight']              = 0;
+					$category['created_on']          = $created_on;
+					$category['modified_on']         = $modified_on;
+
+					$result = db_query("UPDATE {pwcs_category}
+						SET `category_title`='%s', `parent_category_id`= %d, `modified_on`=%d WHERE pwc_category_id = %d",
+						$category['category_title'], $category['parent_category_id'], $category['modified_on'], $category_id
+					);
+					$result = db_query("UPDATE {pwcs_listings}
+						SET `category_title`='%s', `parent_category_id`= %d, `modified_on`=%d WHERE pwc_category_id = %d",
+						$category['category_title'], $category['parent_category_id'], $category['modified_on'], $category_id
+					);
+					pwcs_update_listing_table();
+					pwcs_make_order_table();
+	            }//End of if($_POST['status'] == 'updated')
+	    }//if($_POST['status'] == 'created' || $_POST['status'] == 'updated')
+
+		break;
+
+		case 'manufacturer':
+
+			 $manufacturer_id     = $_POST['manufacturer_id']   ? $_POST['manufacturer_id']    : '';
+			 $manufacturer_name   = $_POST['manufacturer_name'] ? $_POST['manufacturer_name']  : '';
+			 $created_on          = $_POST['created_on']        ? $_POST['created_on']         : time();
+			 $modified_on         = $_POST['modified_on']       ? $_POST['modified_on']        : time();
+
+
+		    if ($_POST['status'] == 'created' || $_POST['status'] == 'updated' || $_POST['status'] == 'deleted')
+		    {
+		    	 if($_POST['status'] == 'created')
+		    	 {
+
+					$sql = "INSERT INTO {pwcs_manufacturer}".
+				    	   " (pwc_mfg_id, mfg_name, is_sync, created_on, modified_on)".
+				    	   " VALUES ( %d, '%s', %d, %d, %d)";
+			        db_query(	$sql,
+			        			$manufacturer_id,
+			        			stripslashes(mysql_escape_string($manufacturer_name)),
+			        			1,
+			        			$created_on,
+			        			$modified_on
+			        		);
+		    	 }
+				if($_POST['status'] == 'updated')
+		    	 {
+
+					$sql = "UPDATE {pwcs_manufacturer} ".
+				    	   " SET mfg_name='%s', modified_on='%s' ".
+				    	   " WHERE pwc_mfg_id='%d' ";
+			        db_query(	$sql,
+			        			stripslashes(mysql_escape_string($manufacturer_name)),
+			        			$modified_on,
+			        			$manufacturer_id
+			        		);
+		    	 }
+				if($_POST['status'] == 'deleted')
+		    	 {
+		    	 	$sql = "DELETE FROM {pwcs_manufacturer} ".
+				    	   " WHERE pwc_mfg_id = '%d' LIMIT 1";
+			        db_query($sql,$manufacturer_id);
+
+					$sql = "UPDATE {pwcs_product} ".
+				    	   " SET manufacturer_id='0' ".
+				    	   " WHERE manufacturer_id='%d' ";
+			        db_query($sql,$manufacturer_id);
+		    	 }
+		 	}//if($_POST['status'] == 'created' || $_POST['status'] == 'updated' || $_POST['status'] == 'deleted')
+
+		break;
+
+		case 'attributegroup': // ADD EDIT DELETE any Attribute group, i.e. Color, Size, Type etc.
+
+			if($status == 'created'){
+				//    [merchant_row_id] => 2
+				//    [group_row_id] => 114
+				//    [group_name] => type
+				//    [is_required] =>
+				//    [status] => created
+				//    [merchant_id] => MER-00002
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attributegroup
+				$sql = "INSERT INTO {pwcs_attr_groups} (attr_group_public_name, is_required, pwc_group_row_id, weight ) VALUES ( '%s', %d, %d, %d)";
+				db_query($sql, stripslashes(mysql_escape_string($_REQUEST['group_name'])), $_REQUEST['is_required'], $_REQUEST['group_row_id'], '');
+			}
+			else if($status == 'deleted'){
+				//    [group_row_id] => 114
+				//    [status] => deleted
+				//    [merchant_id] => MER-00002
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attributegroup
+
+				// Get primary key of this Attribute group
+				$groupid = db_result(db_query("SELECT id FROM {pwcs_attr_groups} WHERE pwc_group_row_id = %d", $_REQUEST['group_row_id']));
+
+				// Get All pwc_attribute_id of this Attribute group
+				$pwc_attribute_id_all = array();
+				$results = db_query("SELECT * FROM {pwcs_attributes} WHERE group_id = %d", $groupid);
+				while($result = db_fetch_object($results)) {
+					$pwc_attribute_id_all[] = $result->pwc_attribute_id;
+				}
+
+				// Delete Product-Attributes relation of this group
+				foreach ($pwc_attribute_id_all as $k=>$pwc_attribute_id) {
+					db_query("DELETE FROM {pwcs_product_attributes} WHERE attr_id LIKE '%,".$pwc_attribute_id.",%' OR attr_id LIKE '".$pwc_attribute_id.",%' OR attr_id LIKE '%,".$pwc_attribute_id."'");
+				}
+
+				// Delete Attributes of this group
+				db_query("DELETE FROM {pwcs_attributes} WHERE group_id = %d", $groupid);
+
+				// Delete Attribute group
+				db_query("DELETE FROM {pwcs_attr_groups} WHERE pwc_group_row_id = %d", $_REQUEST['group_row_id']);
+
+			}
+			else if($status == 'updated'){
+				//    [merchant_row_id] => 2
+				//    [group_row_id] => 1
+				//    [group_name] => Colors
+				//    [is_required] =>
+				//    [status] => updated
+				//    [merchant_id] => MER-00002
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attributegroup
+				$sql = "UPDATE {pwcs_attr_groups} SET attr_group_public_name = '%s', is_required = %d WHERE pwc_group_row_id = %d ";
+				db_query($sql, stripslashes(mysql_escape_string($_REQUEST['group_name'])), $_REQUEST['is_required'], $_REQUEST['group_row_id']);
+			}
+			else {
+				// Invalid Status
+			}
+
+		break;
+
+		case 'attribute':  // ADD EDIT DELETE any Attribute, i.e. Red, Green, XL, L, Male, Female etc.
+
+			if($status == 'created'){
+				//    [group_row_id] => 1
+				//    [attribute_row_id] => 626
+				//    [attribute_name] => Black
+				//    [weight] => 5
+				//    [status] => created
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attribute
+
+				$sql = "INSERT INTO {pwcs_attributes} (pwc_attribute_id, group_id, attr_name, weight) VALUES ( %d, %d, '%s', %d)";
+				db_query($sql, $_REQUEST['attribute_row_id'], pwcs_get_store_attr_group_id($_REQUEST["group_row_id"]), stripslashes(mysql_escape_string($_REQUEST['attribute_name'])),$_REQUEST['weight']);
+			}
+			if($status == 'deleted'){
+				//    [attribute_row_id] => 626
+				//    [status] => deleted
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attribute
+
+				// Delete Product-Attributes relation of this group
+				db_query("DELETE FROM {pwcs_product_attributes} WHERE attr_id LIKE '%,".$_REQUEST['attribute_row_id'].",%' OR attr_id LIKE '".$_REQUEST['attribute_row_id'].",%' OR attr_id LIKE '%,".$_REQUEST['attribute_row_id']."'");
+
+				// Delete Attributes of this group
+				db_query("DELETE FROM {pwcs_attributes} WHERE pwc_attribute_id = %d", $_REQUEST['attribute_row_id']);
+			}
+			else if($status == 'updated'){
+				//    [group_row_id] => 1
+				//    [attribute_row_id] => 4
+				//    [attribute_name] => Green
+				//    [weight] => 0
+				//    [status] => updated
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attribute
+				$sql = "UPDATE {pwcs_attributes} SET attr_name = '%s', weight = %d WHERE pwc_attribute_id = %d ";
+				db_query($sql, $_REQUEST['attribute_name'], $_REQUEST['weight'], $_REQUEST['attribute_row_id']);
+			}
+			else if($status == 'assigned'){
+
+				//    [product_row_id] => 5060
+				//    [price_change] => -5
+				//    [quantity] => 7
+				//    [sub_sku] => BM-2011
+				//    [attribute_row_id] => 617,627
+				//    [is_default] => 1
+				//    [status] => assigned
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attribute
+
+				//pwcs_debug_file_write($_REQUEST, true);
+
+				$attributerowid = $_REQUEST['attribute_row_id'];
+				$attributerowid_tmp = explode(",",$attributerowid);
+				sort($attributerowid_tmp);
+				$attributerowid = implode(",",$attributerowid_tmp);
+    		$sql = " INSERT INTO {pwcs_product_attributes} (nid, attr_id, quantity, affected_price, subsku ) VALUES ( %d, '%s', %d, %f, '%s')";
+			  db_query($sql, pwcs_get_product_nid($_REQUEST['product_row_id']),$attributerowid, $_REQUEST['quantity'],$_REQUEST['price_change'],$_REQUEST['sub_sku']);
+			  if($_REQUEST['is_default'] == 1){
+					db_query("UPDATE {pwcs_product}	SET `default_attribute`='%s' WHERE nid = %d", $attributerowid, pwcs_get_product_nid($_REQUEST['product_row_id']));
+			  }
+			}
+			else if($status == 'unassigned'){
+				//    [status] => unassigned
+				//    [attribute_row_id] => 617,627
+				//    [product_row_id] => 5060
+				//    [apikey] => PS4s1S3DF5rw5Fod5s4w8e4xds5d7w5e=
+				//    [entity] => attribute
+				$attributerowid = $_REQUEST['attribute_row_id'];
+				$attributerowid_tmp = explode(",",$attributerowid);
+				sort($attributerowid_tmp);
+				$attributerowid = implode(",",$attributerowid_tmp);
+				db_query("DELETE FROM {pwcs_product_attributes} WHERE nid = %d AND attr_id = '%s'", pwcs_get_product_nid($_REQUEST['product_row_id']), $_REQUEST['attribute_row_id']);
+				db_query("UPDATE {pwcs_product}	SET `default_attribute`='%s' WHERE `default_attribute` = '%s' AND nid = %d", $attributerowid, $attributerowid, pwcs_get_product_nid($_REQUEST['product_row_id']));
+			}
+			else {
+					// Invalid status
+			}
+		break;
+
+		case 'sync':     //If notification comes for Quick Sync
+
+				/*
+				$merchant_id = $_POST['merchantid'];
+
+
+				pwcs_debug_file_write($_POST, true);
+				die();
+
+			    if($_POST['status'] == 'update')
+			    {
+			    // Will get merchant email address, merchant web address, company name, merchant full name, email the merchant,
+			    // Will get merchant last name & then convert it to small letter,
+			    // Will create my web site list also
+			    // Will collect the merchnat API key & if not then will create in PWC
+			    // Will save the domain name at pWC for cart api auto
+			    // Will sync for the merchant
+
+				$response = pwcs_getMerchantInformation();
+			    pwcs_debug_file_write('Response Data:'.$response);
+
+				if (module_exists('xml_parser')){
+					$response = xml_clean($response);
+					$response_array = xml_parser_string_to_array($response);
+				} else
+					$response_array = 'module not enabled';
+
+				pwcs_debug_file_write($response_array, true);
+
+				//echo $response_array['merchantfirstname'];
+				variable_set('file_directory_path', 'sites/default2/files');
+				variable_set('site_name', 'My Store Site');
+				variable_set('site_mail', 'a.r.zerin@gmail.com');
+				variable_set('site_footer', 'copyright @ '.date('Y').', Premium Web Cart Inc.');
+
+
+				$updateemail = db_query("UPDATE {users} SET name='".strtolower($response_array['merchantlastname'])."', mail='a.r.zerin@gmail.com',init='a.r.zerin@gmail.com',merchant_enc_id='',site_api_key='' WHERE uid = '2'");
+
+
+			    }
+				*/
+		default:
+			// Invalid API Request
+		break;
+  }
+	return null;
+}
+
+/**
+ * The Purpose of this function to redirect the Admin or User to the Login Page
+ * This is just a user friendly task, it is easy to memorize the login word
+ */
+function user_login_page() {
+	global $user;
+	$tmp = NULL;
+	session_destroy();
+	user_module_invoke('logout', $tmp, $user);
+	$user = drupal_anonymous_user();	
+	drupal_goto('user');
+}
+
+
+function pwcs_admin_sync_settings($done = NULL) {
+
+	if($done != 'done') {
+
+		drupal_set_message(t('Synchronization may take couple of minutes.'), 'warning');
+
+
+		drupal_set_message(t('Synchronization will delete all Products Images that you have uploaded from Store Site. You should use this Synchronization only if you see that, Products in PWC Store is not upto date with Products in Premium Web Cart, otherwise You should not use Synchronization feature.'), 'error');
+		drupal_set_message(t('Synchronization will restore all the Products again from your Premium Web Cart Merchant Account to your PWC Store.'), 'warning');
+		/*drupal_set_message(t('Synchronization will delete all the categories & products (including Product Option Group & Options) from your Store Site.<br/>We will be not able to recover them again for you anyhow.'), 'warning');
+		*/
+	}
+	$output = '';
+	$output .= drupal_get_form('pwcs_admin_sync_form');
+	return $output;
+}
+
+
+function pwcs_admin_sync_form() {
+
+	global $user;
+
+	$merchantidlink = l(t('(Home >> Account Settings >> Current Status)'), PWCS_PWC_AUTO_LOGIN_URL . PWCS_PWC_CORE_URL . 'advanceIntegration.html' , array('attributes' => array('class'=>'pwcs-popup-iframe', 'title'=>'PREMIUMWEBCART Advance Integration')));
+	$merchantapisignlink = l(t('(Home >> Cart Settings >> Advanced Integration (API Integration Tab))'), PWCS_PWC_AUTO_LOGIN_URL . PWCS_PWC_CORE_URL . 'advanceIntegration.html' , array('attributes' => array('class'=>'pwcs-popup-iframe', 'title'=>'PREMIUMWEBCART Advance Integration')));
+
+	$form['pwcs_merchant_id'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Premium Web Cart Merchant Id'),
+		'#description' => t('You will get it in your PREMIUMWEBCART Merchant Panel ').$merchantidlink,
+		'#default_value' => $user->merchant_enc_id,
+	);
+
+	$form['pwcs_merchant_api'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Premium Web Cart Merchant API Signature'),
+		'#description' => t('You will get it in your PREMIUMWEBCART Merchant Panel ').$merchantapisignlink ,
+		'#default_value' => $user->site_api_key,
+	);
+
+	if (variable_get('pwcs_load_category_data', '1')==1)
+		$sync_done_message = ' [<b>Not Completed</b>]';
+	else
+		$sync_done_message = '';
+
+	$form['pwcs_merchant_api_sync_category'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Sync Category').'',
+		'#description' => t('You will be able to place Product under one category'),
+		'#default_value' => variable_get('pwcs_load_category_data', '1'),
+	);
+	$form['pwcs_merchant_api_sync_list'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Sync Listing').'',
+		'#description' => t('Listing will give you the opportunity to place a product under multiple Listing'),
+		'#default_value' => variable_get('pwcs_load_category_data', '1'),
+	);
+	
+	
+	if (variable_get('pwcs_load_product_data', '1')==1)
+		$sync_done_message = ' [<b>Not Completed</b>]';
+	else
+		$sync_done_message = '';
+		
+	if (variable_get('pwcs_load_updated_product_data', '1')==1)
+		$sync_done_message2 = ' [<b>Not Completed</b>]';
+	else
+		$sync_done_message2 = '';
+		
+	$form['pwcs_merchant_api_sync_product'] = array(
+		'#type' => 'radios',
+		'#options' => array('1'=>t('Newly - Select this if you are synching first time. Will delete all the Products & uploaded Image').$sync_done_message, '2'=>t('Update Only - Do not delete Current Products & assigned Images for those Products, Just Update Products').$sync_done_message,),
+		'#default_value' => variable_get('pwcs_load_updated_product_data', '1'),
+		'#title' => t('Sync Products'),
+	);
+
+
+
+	if (variable_get('pwcs_load_manufacturer_data', '1')==1)
+		$sync_done_message = ' [<b>Not Completed</b>]';
+	else
+		$sync_done_message = '';
+
+	$form['pwcs_merchant_api_sync_manufacturer'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Sync Manufacturer').$sync_done_message,
+		//'#description' => t('For Every Single Product View your End User will see Manufacturer Details under Manufacturer Tab'),
+		'#default_value' => variable_get('pwcs_load_manufacturer_data', '1'),
+	);
+
+	if (variable_get('pwcs_load_basic_settings_data', '1')==1)
+		$sync_done_message = ' [<b>Not Completed</b>]';
+	else
+		$sync_done_message = '';
+
+	$form['pwcs_merchant_api_sync_basic_settings'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Sync Basic Settings '),
+		'#description' => t('Product Prefix, Currency Symbol, Currency will be pulled from Your Merchant Account'),
+		'#default_value' => variable_get('pwcs_load_basic_settings_data', '1'),
+	);
+
+	if (variable_get('pwcs_load_attribute_data', '1')==1)
+		$sync_done_message = ' [<b>Not Completed</b>]';
+	else
+		$sync_done_message = '';
+
+	$form['pwcs_merchant_api_sync_attributes'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Sync Attributes/Options Information '),
+		//'#description' => t('For Every Single Product View your End User will see Manufacturer Details under Manufacturer Tab'),
+		'#default_value' => variable_get('pwcs_load_attribute_data', '1'),
+	);
+
+	$form['button'] = array(
+		'#type' => 'submit',
+		'#default_value' => 'Save and Sync Now'
+	);
+
+	return $form;
+}
+
+function pwcs_admin_sync_form_submit($form, $form_value)
+{
+	global $user;
+
+
+	variable_set('pwcs_load_category_data', $form_value['values']['pwcs_merchant_api_sync_category']);
+	variable_set('pwcs_load_listing_data', $form_value['values']['pwcs_merchant_api_sync_list']);
+	
+	if ($form_value['values']['pwcs_merchant_api_sync_product']==1)
+	variable_set('pwcs_load_product_data', 1);
+	if ($form_value['values']['pwcs_merchant_api_sync_product']==2)
+	variable_set('pwcs_load_updated_product_data', 1);
+	
+	variable_set('pwcs_load_attribute_data', $form_value['values']['pwcs_merchant_api_sync_attributes']);
+	variable_set('pwcs_load_manufacturer_data', $form_value['values']['pwcs_merchant_api_sync_manufacturer']);
+	variable_set('pwcs_load_basic_settings_data', $form_value['values']['pwcs_merchant_api_sync_basic_settings']);
+
+
+    if($form_value['submitted'] == 1) {
+			variable_set('pwcs_fetchMerchantData', '0');
+			db_query("UPDATE {users} SET `merchant_enc_id`='%s', `site_api_key`='%s' WHERE uid = %d", $form_value['values']['pwcs_merchant_id'], $form_value['values']['pwcs_merchant_api'], $user->uid);
+			pwcs_fetchMerchantData($form_value['values']['pwcs_merchant_id'], $form_value['values']['pwcs_merchant_api']);
+			variable_set('pwcs_fetchMerchantData', '1');
+			drupal_set_message(t('Data Sync Completed!'));
+	    $_REQUEST[destination] = 'siteadmin/sync-settings/done';
+    }
+
+}
+
+/**
+ * Menu callback; generic function to display a page of the most frequent search keywords
+ * Added by Rasel Kabir
+ */
+function pwcs_topreports($type = 'search') {
+
+  $header = array(
+    array('data' => t('Count'), 'field' => 'count', 'sort' => 'desc'),
+    array('data' => t('Message'))
+  );
+
+  $result = pager_query("SELECT COUNT(wid) AS count, message, variables FROM {watchdog} WHERE type = '%s' GROUP BY message, variables ". tablesort_sql($header), 30, 0, "SELECT COUNT(DISTINCT(message)) FROM {watchdog} WHERE type = '%s'", $type);
+
+  $rows = array();
+  while ($dblog = db_fetch_object($result)) {
+    //$rows[] = array($dblog->count, truncate_utf8(_dblog_format_message($dblog), 56, TRUE, TRUE));
+	//print_r ($dblog);
+	//print_r(unserialize($dblog->variables));
+	$dblog->message = str_replace(' (@type).','',$dblog->message);
+	$message = t($dblog->message, unserialize($dblog->variables));
+    $rows[] = array($dblog->count, $message);
+  }
+
+  if (empty($rows)) {
+    $rows[] = array(array('data' => t('No Search Word has been used for searching.'), 'colspan' => 2));
+  }
+
+  $output  = theme('table', $header, $rows);
+  $output .= theme('pager', NULL, 30, 0);
+
+  return $output;
+}
+
+function pwcs_topreports_clear($type = 'search') {
+  db_query("DELETE FROM {watchdog} WHERE type = '%s'", $type);
+  drupal_goto('siteadmin/reports/search');
+
+}
+
+function pwcs_admin_seo_settings($done = NULL) {
+
+	if($done != 'done') {
+		//drupal_set_message(t('Synchronization will wipe out all the products added pictures and descriptions on PWC Stores'), 'error');
+	}
+	$output = '';
+	$output .= drupal_get_form('pwcs_admin_sync_form2');
+	return $output;
+}
+
+
+function pwcs_admin_sync_form2() {
+
+	global $user;
+	global $base_url;
+
+
+	if (variable_get('pwcs_sitemap_enabled', '1')==1)
+		$sync_done_message = ' [<b>Sitemap is Enabled Now.</b>]';
+	else
+		$sync_done_message = '';
+
+
+	if(variable_get('pwcs_sitemap_enabled', '0')==1)
+	{
+		$form['pwcs_my_sitemap_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Update my Store Site sitemap automatically'),
+			'#default_value' => variable_get('pwcs_sitemap_enabled', '0'),
+			'#attributes' => array('checked' => 'checked'),
+		);
+	}else {
+		$form['pwcs_my_sitemap_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Update my Store Site sitemap automatically'),
+			'#default_value' => variable_get('pwcs_sitemap_enabled', '0'),
+		);
+	}
+
+	if(variable_get('pwcs_my_sitemap_yahoo_enabled', '0')==1)
+	{
+		$form['pwcs_my_sitemap_yahoo_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping Yahoo Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_yahoo_enabled', '0'),
+			'#attributes' => array('checked' => 'checked'),
+		);
+	}else {
+		$form['pwcs_my_sitemap_yahoo_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping Yahoo Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_yahoo_enabled', '0'),
+		);
+	}
+
+
+	if(variable_get('pwcs_my_sitemap_google_enabled', '0')==1)
+	{
+		$form['pwcs_my_sitemap_google_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping Google Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_google_enabled', '0'),
+			'#attributes' => array('checked' => 'checked'),
+		);
+	}else {
+		$form['pwcs_my_sitemap_google_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping Google Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_google_enabled', '0'),
+		);
+	}
+	if(variable_get('pwcs_my_sitemap_ask_enabled', '0')==1)
+	{
+		$form['pwcs_my_sitemap_ask_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping ASK.com Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_ask_enabled', '0'),
+			'#attributes' => array('checked' => 'checked'),
+		);
+	}else {
+		$form['pwcs_my_sitemap_ask_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping ASK.com Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_ask_enabled', '0'),
+		);
+	}
+
+	if(variable_get('pwcs_my_sitemap_bing_enabled', '0')==1)
+	{
+		$form['pwcs_my_sitemap_bing_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping Bing Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_bing_enabled', '0'),
+			'#attributes' => array('checked' => 'checked'),
+		);
+	}else {
+		$form['pwcs_my_sitemap_bing_enabled'] = array(
+			'#type' => 'checkbox',
+			'#title' => t('Ping Bing Search Engine Automatically when sitemap will be updated Automatically'),
+			'#default_value' => variable_get('pwcs_my_sitemap_bing_enabled', '0'),
+		);
+	}
+
+	$sitemap_location = pwcs_get_store_sitemap_location();
+	$target_url_yahoo =  variable_get('pwcs_yahoo_ping_url', 'http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=SitemapWriter&url=#SITEMAP_URL');
+	$target_url_yahoo = str_replace('#SITEMAP_URL',$sitemap_location,$target_url_yahoo);
+
+
+	$target_url_ask =  variable_get('pwcs_ask_ping_url', 'http://submissions.ask.com/ping?sitemap=#SITEMAP_URL');
+	$target_url_ask = str_replace('#SITEMAP_URL',$sitemap_location,$target_url_ask);
+
+	$target_url_bing =  variable_get('pwcs_bing_ping_url', 'http://www.bing.com/webmaster/ping.aspx?siteMap=#SITEMAP_URL');
+	$target_url_bing = str_replace('#SITEMAP_URL',$sitemap_location,$target_url_bing);
+
+	$target_url_google =  variable_get('pwcs_google_ping_url', 'http://www.google.com/webmasters/tools/ping?sitemap=#SITEMAP_URL');
+	$target_url_google = str_replace('#SITEMAP_URL',$sitemap_location,$target_url_google);
+
+
+	$form['seo_info']['searchengine_urls'] = array('#type' => 'fieldset', '#title' => t('Your Sitemap Location & Search Engine Ping URL'));
+	$form['seo_info']['searchengine_urls']['#collapsed'] = 0;
+
+
+	$form['seo_info']['searchengine_urls']['pwcs_google_ping_url'] = array(
+		'#type' => 'markup',
+		'#value' => 'Google - <br/>'.$target_url_google . '<br/>',
+	);
+
+	$form['seo_info']['searchengine_urls']['pwcs_yahoo_ping_url'] = array(
+		'#type' => 'markup',
+		'#value' => '<br/>Yahoo - <br/>'.$target_url_yahoo. '<br/>',
+
+	);
+
+	$form['seo_info']['searchengine_urls']['pwcs_bing_ping_url'] = array(
+		'#type' => 'markup',
+		'#value' => '<br/>Bing - <br/>'.$target_url_bing. '<br/>',
+	);
+
+	$form['seo_info']['searchengine_urls']['pwcs_ask_ping_url'] = array(
+		'#type' => 'markup',
+		'#value' => '<br/>ASK.com - <br/>'.$target_url_ask. '<br/>',
+	);
+
+
+	$form['button'] = array(
+		'#type' => 'submit',
+		'#default_value' => 'Save Settings'
+	);
+
+	return $form;
+}
+function pwcs_admin_sync_form2_submit($form, $form_value)
+{
+	global $user;
+	//echo $form_value['values']['pwcs_my_sitemap_enabled'];
+	variable_set('pwcs_sitemap_enabled', $form_value['values']['pwcs_my_sitemap_enabled']);
+	variable_set('pwcs_my_sitemap_yahoo_enabled', $form_value['values']['pwcs_my_sitemap_yahoo_enabled']);
+	variable_set('pwcs_my_sitemap_google_enabled', $form_value['values']['pwcs_my_sitemap_google_enabled']);
+	variable_set('pwcs_my_sitemap_ask_enabled', $form_value['values']['pwcs_my_sitemap_ask_enabled']);
+	variable_set('pwcs_my_sitemap_bing_enabled', $form_value['values']['pwcs_my_sitemap_bing_enabled']);
+
+
+    if($form_value['submitted'] == 1) {
+    	pwcs_sitemap_file_write();
+    	pwcs_pingto_search_engine();
+    }
+
+}
+function pwcs_attribute_group_count() {
+	$countrows = db_result(db_query("SELECT COUNT(*) FROM {pwcs_attr_groups}"));
+	return ($countrows > 0) ? $countrows : 0;
+}
+function pwcs_manufacturer_count() {
+	$countrows = db_result(db_query("SELECT COUNT(*) FROM {pwcs_manufacturer}"));
+	return ($countrows > 0) ? $countrows : 0;
+}
+
+
+
+
+
+
+
+/**** Sitemap and Search Engine Functions ****/
+
+function pwcs_get_sitemap_file_name($myFile = "sitemap.xml") {
+
+    $myFile = $_SERVER['HTTP_HOST'].'-'.$myFile;
+    return $myFile;
+}
+function pwcs_sitemap_file_write($stringData='', $myFile = "sitemap.xml") {
+
+	if(variable_get('pwcs_sitemap_enabled', 1) == 0) {
+		return;
+	}
+
+    $myFile = pwcs_get_sitemap_file_name();
+	$stringData=pwcs_get_sitemap_xml();
+
+	$fh = @fopen($myFile, 'w+') or drupal_set_message(t('Could Not Create Sitemap file : '.$myFile), 'error');;
+	@fwrite($fh, $stringData);
+	@fclose($fh);
+}
+function pwcs_get_sitemap_xml(){
+
+	global $base_url;
+	$b = '';
+	$sql  = "SELECT n.nid FROM {node} n WHERE (n.type = 'product' OR n.type = 'page' OR n.type = 'sitepage') AND n.status='1' ORDER BY n.type ASC";
+	$results = db_query($sql);
+	while($result = db_fetch_object($results))
+	{
+			$thisnode = node_load($result->nid);
+			//$b .= $base_url.'/'.$thisnode->path.CHR(13).CHR(10);
+			//$b .= format_date($thisnode->changed, 'custom', 'Y-m-d', 0).CHR(13).CHR(10);
+			$b .= '	<url>
+					<loc>'.htmlentities($base_url.'/'.$thisnode->path).'</loc>
+					<lastmod>'.format_date($thisnode->changed, 'custom', 'Y-m-d', 0).'</lastmod>
+					<changefreq>weekly</changefreq>
+					<priority>0.8</priority>
+				  </url>'.CHR(13).CHR(10);
+	}
+
+	$sitemap_text='<?xml version="1.0" encoding="utf-8"?>
+			<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+			'.$b.'
+			</urlset>';
+
+
+	return trim($sitemap_text);
+}
+function pwcs_get_store_sitemap_location()
+{
+	global $base_url;
+	$sitemap_location = $base_url.'/'.pwcs_get_sitemap_file_name();
+	return $sitemap_location;
+}
+function pwcs_pingto_search_engine()
+{
+	global $base_url;
+	$sitemap_location = $base_url.'/'.pwcs_get_sitemap_file_name();
+
+
+	$target_url1 =  variable_get('pwcs_yahoo_ping_url', 'http://search.yahooapis.com/SiteExplorerService/V1/updateNotification?appid=SitemapWriter&url=#SITEMAP_URL');
+	$target_url1 = str_replace('#SITEMAP_URL',$sitemap_location,$target_url1);
+
+	if(variable_get('pwcs_my_sitemap_yahoo_enabled', 0) == 1) {
+		pwcs_ping_search_engine('Yahoo',$target_url1);
+	}
+
+	$target_url1 =  variable_get('pwcs_ask_ping_url', 'http://submissions.ask.com/ping?sitemap=#SITEMAP_URL');
+	$target_url1 = str_replace('#SITEMAP_URL',$sitemap_location,$target_url1);
+	if(variable_get('pwcs_my_sitemap_ask_enabled', 0) == 1) {
+		pwcs_ping_search_engine('ASK.com',$target_url1);
+	}
+
+	$target_url1 =  variable_get('pwcs_bing_ping_url', 'http://www.bing.com/webmaster/ping.aspx?siteMap=#SITEMAP_URL');
+	$target_url1 = str_replace('#SITEMAP_URL',$sitemap_location,$target_url1);
+	if(variable_get('pwcs_my_sitemap_bing_enabled', 0) == 1) {
+		pwcs_ping_search_engine('Bing',$target_url1);
+	}
+
+	$target_url1 =  variable_get('pwcs_google_ping_url', 'http://www.google.com/webmasters/tools/ping?sitemap=#SITEMAP_URL');
+	$target_url1 = str_replace('#SITEMAP_URL',$sitemap_location,$target_url1);
+	if(variable_get('pwcs_my_sitemap_google_enabled', 0) == 1) {
+		pwcs_ping_search_engine('Google',$target_url1);
+	}
+
+
+}
+/**
+ * Cache Clear in full
+ * Added By Rasel Kabir
+ */
+function pwcs_flush_cache(){
+  _drupal_flush_css_js();
+  drupal_clear_css_cache();
+  drupal_clear_js_cache();
+
+  $core = array('cache', 'cache_block', 'cache_filter', 'cache_page');
+  $cache_tables = array_merge(module_invoke_all('flush_caches'), $core);
+  foreach ($cache_tables as $table) {
+    cache_clear_all('*', $table, TRUE);
+  }
+}
+
+function pwcs_refresh($type = NULL){
+
+	// TEMPORARY ITEMS //
+	//pwcs_siteadmintheme_updatesql();
+
+	// PERMAMENT ITEMS //
+
+	//Reset Cart
+	pwcs_resetcart();
+
+	//Update Listing
+  	pwcs_update_listing_table();
+  	pwcs_bulk_clean_listing_table();
+
+	//CLEARING CACHE
+	pwcs_flush_cache();
+  	//drupal_flush_all_caches();
+
+  	drupal_set_message(t('Your Store Site has been Refreshed Successfully.'));
+  	drupal_goto('<front>');
+}
+
+function pwcs_siteadmintheme_updatesql() {
+
+	//Enable SITEADMIN NEW THEME
+    $key = 'siteadmintheme';
+    //db_update('system')->fields(array('status' => 1))->condition('type', 'theme')->condition('name', $key)->execute();
+    //system_initialize_theme_blocks($key);
+    db_query("UPDATE {system} SET status = 1 WHERE type = 'theme' and name = '%s'", $key);
+    db_query("DELETE FROM {variable} WHERE name = 'theme_siteadmintheme_settings'");
+    $theme_siteadmintheme_settings_value = 'a:24:{s:11:"toggle_logo";i:0;s:11:"toggle_name";i:0;s:13:"toggle_slogan";i:0;s:14:"toggle_favicon";i:1;s:12:"default_logo";i:1;s:9:"logo_path";s:0:"";s:11:"logo_upload";s:0:"";s:15:"default_favicon";i:1;s:12:"favicon_path";s:0:"";s:14:"favicon_upload";s:0:"";s:10:"theme_grid";s:10:"grid16-960";s:16:"fluid_grid_width";s:8:"fluid-95";s:14:"sidebar_layout";s:14:"sidebars-split";s:19:"sidebar_first_width";s:1:"4";s:18:"sidebar_last_width";s:1:"2";s:10:"theme_font";s:4:"none";s:15:"theme_font_size";s:12:"font-size-12";s:21:"primary_menu_dropdown";i:0;s:18:"breadcrumb_display";i:1;s:24:"user_notverified_display";i:1;s:17:"block_config_link";i:0;s:9:"grid_mask";i:0;s:16:"rebuild_registry";i:0;s:13:"fix_css_limit";i:0;}';
+    db_query("INSERT INTO {variable} ( `name` , `value` ) VALUES ( '%s', '%s')", 'theme_siteadmintheme_settings', $theme_siteadmintheme_settings_value);
+	variable_set('pwcs_theme_switch_set_block_'.$key, 0);
+    list_themes(TRUE);
+    menu_rebuild();
+    drupal_rebuild_theme_registry();
+	//variable_set('theme_default', $key);
+
+	//REMOVE OTHERS BLOCK FOR SITEADMIN of pwcs_admin theme.
+	db_query("UPDATE {blocks} SET status = 0 WHERE delta =  'siteadmin_navigation_top'");
+	db_query("UPDATE {blocks} SET status = 1 WHERE delta =  'siteadmin_navigation_top' AND theme = 'siteadmintheme'");
+
+	//REMOVE OTHERS BLOCK FOR SITEADMIN of pwcs_admin theme.
+	db_query("UPDATE {blocks} SET status = 0 WHERE theme =  'pwcs_admin'");
+	db_query("UPDATE {blocks} SET status = 1 WHERE delta =  'siteadmin_navigation' AND theme = 'pwcs_admin'");
+}
+
+/**
+ * Siteadmin home page
+ * Added by Rasel Kabir
+ */
+function pwcs_siteadmin(){
+
+	global $user;
+	drupal_set_title(t("Welcome @name", array('@name' => $user->name)));
+
+	if($user->theme == 'pwcs_admin'){
+		$button = l('Switch To New Theme', 'siteadmin/siteadmintheme/switch/siteadmintheme', array('html' => true, 'attributes' => array('class'=>'button', 'title'=>'Switch Siteadmin Theme to New One')));
+		drupal_set_message('There\'s New User Interface For Site Admin Click The Button To Get The New One > '.$button);
+	} else if($user->theme == 'siteadmintheme'){
+		//$button = l('Switch Back To Old Theme', 'siteadmin/siteadmintheme/switch/pwcs_admin', array('html' => true, 'attributes' => array('class'=>'button', 'title'=>'Switch Siteadmin Theme to New One')));
+		//drupal_set_message('To Switch Back To The Previous User Interface > '.$button);
+		// Nothing for now
+	} else {
+		// No Theme Set
+	}
+
+	$output = '';
+	$output .= '<h3>'.t('Quick Start').'</h3>';
+	$output .= theme_pwcs_siteadmin_dashboard();
+	return $output;
+}
+
+/**
+ * Siteadmin home page dashboard theme
+ * Added by Rasel Kabir
+ */
+function theme_pwcs_siteadmin_dashboard(){
+
+	$output = '';
+	$output .= '<div class="siteadmin_dashboard">';
+	$output .= theme_pwcs_siteadmin_dashboard_item('My Orders', 'myorders', PWCS_PWC_AUTO_LOGIN_URL . PWCS_PWC_CORE_URL . 'orders/orders/currentOrders.html', 'pwcs-popup-iframe', 'PREMIUMWEBCART ORDER PAGE');
+	$output .= theme_pwcs_siteadmin_dashboard_item('My Products', 'myproducts', 'siteadmin/products');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Price Manager', 'pricemanager', 'siteadmin/products/1pagepricemanager');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Page Builder', 'pagebuilder', 'advancepages/siteadmin/sitepage');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Media Manager', 'mediamanager', 'siteadmin/media');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Product Review', 'productreview', 'siteadmin/productreview');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Search Reports', 'searchreports', 'siteadmin/reports/search');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Social Media', 'socialmedia', '');
+	$output .= theme_pwcs_siteadmin_dashboard_item('Manufacturer', 'manufacturer', 'siteadmin/manufacturers');
+	$output .= '<div style="clear:both;"></div>';
+	$output .= '</div>';
+
+	return $output;
+}
+
+/**
+ * Siteadmin home page dashboard theme buttons
+ * Added by Rasel Kabir
+ */
+function theme_pwcs_siteadmin_dashboard_item($title, $type='', $link='', $linkclass='', $linktitle='') {
+	$item_html = '<div class="sd_item_inner"> <div class="image '.$type.'"></div> <div class="text">'.t($title).'</div> </div>';
+	return '<div class="sd_item">'.l($item_html, $link, array('html' => true, 'attributes' => array('class'=>$linkclass, 'title'=>$linktitle))).'</div>'; 
+}
+

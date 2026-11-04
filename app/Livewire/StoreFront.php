@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Product;
+use App\Models\Collection as StoreCollection;
+use App\Models\Manufacturer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -20,6 +22,10 @@ class StoreFront extends Component
     #[Url]
     public string $category = '';
     #[Url]
+    public string $collection = '';
+    #[Url]
+    public array $manufacturers = [];
+    #[Url]
     public string $color = '';
     #[Url]
     public string $size = '';
@@ -28,20 +34,30 @@ class StoreFront extends Component
 
     public function updated($property): void
     {
-        if (in_array($property, ['searchQuery', 'category', 'color', 'size', 'sort'], true)) {
+        if (in_array($property, ['searchQuery', 'category', 'collection', 'manufacturers', 'color', 'size', 'sort'], true)
+            || str_starts_with($property, 'manufacturers.')) {
             $this->resetPage();
         }
     }
 
     public function clearFilters(): void
     {
-        $this->reset('searchQuery', 'category', 'color', 'size', 'sort');
+        $this->reset('searchQuery', 'category', 'collection', 'manufacturers', 'color', 'size', 'sort');
         $this->resetPage();
     }
 
     public function setCategory(string $category): void
     {
         $this->category = $category;
+        $this->collection = '';
+        $this->resetPage();
+    }
+
+    public function setCollection(string $slug): void
+    {
+        abort_unless(StoreCollection::where('slug', $slug)->where('is_published', true)->exists(), 404);
+        $this->collection = $slug;
+        $this->category = '';
         $this->resetPage();
     }
 
@@ -54,12 +70,16 @@ class StoreFront extends Component
                 $query->where('name', 'like', $term)->orWhere('description', 'like', $term)->orWhere('category', 'like', $term);
             }))
             ->when($this->category, fn ($query) => $query->where('category', $this->category))
+            ->when($this->collection, fn ($query) => $query->whereHas('collections', fn ($collections) => $collections->where('slug', $this->collection)->where('is_published', true)))
+            ->when($this->manufacturers !== [], fn ($query) => $query->whereIn('manufacturer_id', array_filter(array_map('intval', $this->manufacturers))))
             ->when($this->color, fn ($query) => $query->whereHas('variants', fn ($variants) => $variants->where('color', $this->color)))
             ->when($this->size, fn ($query) => $query->whereHas('variants', fn ($variants) => $variants->where('size', $this->size)))
-            ->with(['featured_image', 'variants'])
+            ->with(['featured_image', 'variants', 'manufacturer'])
             ->when($this->sort === 'newest', fn ($query) => $query->latest())
-            ->when($this->sort === 'price_low', fn ($query) => $query->orderBy('price'))
-            ->when($this->sort === 'price_high', fn ($query) => $query->orderByDesc('price'))
+            ->when(in_array($this->sort, ['price_low', 'price_high'], true), function ($query) {
+                $direction = $this->sort === 'price_low' ? 'asc' : 'desc';
+                $query->orderByRaw("CASE WHEN sale_price IS NOT NULL AND (sale_starts_at IS NULL OR sale_starts_at <= ?) AND (sale_ends_at IS NULL OR sale_ends_at > ?) THEN sale_price ELSE price END {$direction}", [now(), now()]);
+            })
             ->when($this->sort === 'featured', fn ($query) => $query->orderBy('id'))
             ->paginate(8);
     }
@@ -68,6 +88,22 @@ class StoreFront extends Component
     public function categories(): Collection
     {
         return Product::where('is_published', true)->whereNotNull('category')->distinct()->orderBy('category')->pluck('category');
+    }
+
+    #[Computed]
+    public function curatedCollections(): Collection
+    {
+        return StoreCollection::where('is_published', true)
+            ->whereHas('products', fn ($query) => $query->where('is_published', true))
+            ->with(['products' => fn ($query) => $query->where('is_published', true)->with('featured_image')])
+            ->orderBy('id')->get();
+    }
+
+    #[Computed]
+    public function manufacturerOptions(): Collection
+    {
+        return Manufacturer::whereHas('products', fn ($query) => $query->where('is_published', true))
+            ->orderBy('name')->get();
     }
 
     #[Computed]

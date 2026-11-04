@@ -1,0 +1,38 @@
+/* $Id: pwcs_slideshow.css,v 1.0 2011/03/23 rasel kabir Exp $ */
+
+#primaryCallout{
+/*	float:left;
+	margin-bottom:12px;*/
+	overflow:hidden;
+	position:relative;
+}
+
+#calloutLinks{
+	position:absolute;
+	top:7px;
+	right:5px;
+	margin:0;
+	padding:0;
+}
+
+#calloutLinks a{
+	display:block;
+	line-height:17px;
+	float:left;
+	margin:0 2px;
+	text-align:center;
+	text-decoration:none;
+	height:18px;
+	width:18px;
+}
+
+#calloutLinks a{
+	background-color:#FFFFFF;
+	color:#000000;
+	font-weight:bold;
+}
+
+#calloutLinks a.active{
+	background-color:#000000;
+	color:#FFFFFF;
+}
