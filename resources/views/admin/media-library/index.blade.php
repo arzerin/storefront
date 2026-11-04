@@ -1,0 +1,10 @@
+@extends('layouts.admin')
+@section('title', 'Media library')
+@section('heading', 'Media library')
+@section('subheading', 'Upload images once and use them on pages or blocks.')
+@section('breadcrumb', 'Media library')
+@section('content')
+@if($errors->any())<div class="alert alert-danger">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
+<form method="post" action="{{ route('admin.media-library.store') }}" enctype="multipart/form-data" class="card mb-4"><div class="card-body"><h4>Add an image</h4>@csrf<div class="row g-3 align-items-end"><div class="col-md-5"><label class="form-label">Image (JPEG, PNG, WebP or GIF; max 4 MB)</label><input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" class="form-control" required></div><div class="col-md-5"><label class="form-label">Alt text</label><input name="alt_text" class="form-control" placeholder="Describe the image for visitors using screen readers" required></div><div class="col-md-2"><button class="btn btn-primary w-100">Upload</button></div></div></div></form>
+<div class="row g-3">@forelse($media as $asset)<div class="col-xl-3 col-md-4 col-sm-6"><div class="card h-100"><img src="{{ $asset->path }}" alt="{{ $asset->alt_text }}" class="card-img-top" style="height:170px;object-fit:cover"><div class="card-body"><div class="small text-muted text-truncate mb-2">{{ $asset->original_name }}</div><form method="post" action="{{ route('admin.media-library.update', $asset) }}">@csrf @method('PUT')<label class="form-label small">Alt text</label><input name="alt_text" value="{{ $asset->alt_text }}" class="form-control form-control-sm" required><button class="btn btn-sm btn-outline-primary mt-2">Save description</button></form><form method="post" action="{{ route('admin.media-library.destroy', $asset) }}" onsubmit="return confirm('Remove this image from the library?')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger mt-2">Remove</button></form></div></div></div>@empty<div class="col-12 text-muted">No images yet.</div>@endforelse</div><div class="mt-3">{{ $media->links() }}</div>
+@endsection

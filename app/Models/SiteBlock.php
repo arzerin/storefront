@@ -14,6 +14,7 @@ class SiteBlock extends Model
         'footer' => 'Footer above copyright',
     ];
 
-    protected $fillable = ['title', 'body', 'region', 'sort_order', 'is_enabled'];
+    protected $fillable = ['title', 'body', 'region', 'sort_order', 'is_enabled', 'media_asset_id'];
+    public function mediaAsset(): \Illuminate\Database\Eloquent\Relations\BelongsTo { return $this->belongsTo(MediaAsset::class); }
     protected $casts = ['is_enabled' => 'boolean', 'sort_order' => 'integer'];
 }

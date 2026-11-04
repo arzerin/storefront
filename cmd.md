@@ -169,3 +169,16 @@ php artisan test tests/Feature/SiteContentManagementTest.php
 ```
 
 The Blade views were added under `resources/views/admin`, `resources/views/components` and the existing storefront/layout directories; Laravel has no built-in `make:view` command. The seeder uses `firstOrCreate`, so rerunning it keeps content edited in the admin.
+
+## Site builder
+
+```bash
+# The migrations, models, controllers, views and assets are included in this repository.
+php artisan migrate
+php artisan db:seed --class=AyraSiteBuilderSeeder
+php artisan storage:link
+npm run build
+php artisan test tests/Feature/SiteBuilderTest.php
+```
+
+The builder uses `site_pages`, `site_page_revisions`, and `media_assets`. Uploads go to the public disk under `storage/app/public/site-builder`; the media library also indexes existing `public/media/ayra` images. Page templates live in `resources/themes/ayra/views/site-builder/pages`, with metadata in `resources/themes/ayra/theme.php`. The old code is preserved on branch `codex/pre-site-builder-2026-11-05`; rollback notes and the pre-builder site-content snapshot are in `/Users/jerin/Herd/webshop-backups/site-builder-2026-11-05/`.

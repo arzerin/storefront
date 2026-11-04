@@ -132,3 +132,26 @@ For installation and scaffolding commands, see `cmd.md`.
 | `DELETE /admin/footer-menu/{item}` | `FooterMenuController@destroy` | Delete a footer link. |
 
 `SiteSetting` provides storefront identity, hero and footer text. `SiteBlock` provides visible blocks in the benefits strip, homepage placements and footer. `FooterMenuItem` provides links in Explore, Account and Help footer columns, with optional guest/customer visibility. All admin routes above require `admin.auth`. The homepage renders through `StoreFront` and `resources/views/livewire/store-front.blade.php`; common footer and branding render through `resources/views/layouts/app.blade.php`.
+
+## Site builder and media library
+
+| Route | Function | Purpose |
+| --- | --- | --- |
+| `GET /admin/site-builder` | `SiteBuilderController@index` | List homepage and content pages. |
+| `GET /admin/site-builder/themes` | `SiteBuilderController@themes` | Show installed Ayra theme and page templates. |
+| `GET /admin/site-builder/pages/create` | `SiteBuilderController@create` | New page form. |
+| `POST /admin/site-builder/pages` | `SiteBuilderController@store` | Create a draft page from a template. |
+| `GET /admin/site-builder/pages/{page}/edit` | `SiteBuilderController@edit` | Section editor. |
+| `PUT /admin/site-builder/pages/{page}` | `SiteBuilderController@update` | Save ordered sections as a draft, preview, or publish. |
+| `GET /admin/site-builder/pages/{page}/preview` | `SiteBuilderController@preview` | Admin-only draft preview. |
+| `POST /admin/site-builder/pages/{page}/publish` | `SiteBuilderController@publish` | Publish the saved draft. |
+| `POST /admin/site-builder/pages/{page}/restore/{revision}` | `SiteBuilderController@restore` | Restore and publish an earlier revision. |
+| `DELETE /admin/site-builder/pages/{page}` | `SiteBuilderController@destroy` | Delete a content page; homepage protected. |
+| `GET /admin/media-library` | `MediaLibraryController@index` | List reusable images. |
+| `POST /admin/media-library` | `MediaLibraryController@store` | Upload image and alt text. |
+| `PUT /admin/media-library/{asset}` | `MediaLibraryController@update` | Update alt text. |
+| `DELETE /admin/media-library/{asset}` | `MediaLibraryController@destroy` | Delete an unused image. |
+| `GET /{page:slug}` | `SitePageController@show` | Render a published content page. |
+| `GET /` | `StoreFront@render` | Render the published homepage sections with live catalogue filters. |
+
+`SiteBuilder` validates allowed section types and reserved paths. `SitePage` stores drafts; `SitePageRevision` stores published snapshots. The active theme manifest and page templates are in `resources/themes/ayra/`. `MediaAsset` supplies images and alt text to page sections and `SiteBlock` records. Commerce routes remain ahead of the content-page route.

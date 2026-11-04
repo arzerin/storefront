@@ -32,6 +32,8 @@
             <li class="nav-item"><a href="{{ route('admin.collections.index') }}" class="nav-link {{ request()->routeIs('admin.collections.*') ? 'active' : '' }}"><i class="nav-icon bi bi-collection"></i><p>Collections</p></a></li>
             <li class="nav-item"><a href="{{ route('admin.manufacturers.index') }}" class="nav-link {{ request()->routeIs('admin.manufacturers.*') ? 'active' : '' }}"><i class="nav-icon bi bi-building"></i><p>Manufacturers</p></a></li>
             <li class="nav-header text-uppercase small text-white-50 px-3 pt-3 pb-2">Storefront</li>
+            <li class="nav-item"><a href="{{ route('admin.site-builder.index') }}" class="nav-link {{ request()->routeIs('admin.site-builder.*') ? 'active' : '' }}"><i class="nav-icon bi bi-columns-gap"></i><p>Site builder</p></a></li>
+            <li class="nav-item"><a href="{{ route('admin.media-library.index') }}" class="nav-link {{ request()->routeIs('admin.media-library.*') ? 'active' : '' }}"><i class="nav-icon bi bi-images"></i><p>Media library</p></a></li>
             <li class="nav-item"><a href="{{ route('admin.site-settings.edit') }}" class="nav-link {{ request()->routeIs('admin.site-settings.*') ? 'active' : '' }}"><i class="nav-icon bi bi-sliders"></i><p>Site settings</p></a></li>
             <li class="nav-item"><a href="{{ route('admin.blocks.index') }}" class="nav-link {{ request()->routeIs('admin.blocks.*') ? 'active' : '' }}"><i class="nav-icon bi bi-layout-text-window"></i><p>Blocks</p></a></li>
             <li class="nav-item"><a href="{{ route('admin.footer-menu.index') }}" class="nav-link {{ request()->routeIs('admin.footer-menu.*') ? 'active' : '' }}"><i class="nav-icon bi bi-list-nested"></i><p>Footer menu</p></a></li>

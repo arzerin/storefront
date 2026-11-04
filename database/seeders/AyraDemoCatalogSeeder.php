@@ -83,5 +83,6 @@ class AyraDemoCatalogSeeder extends Seeder
         $this->call(AyraCollectionsSeeder::class);
         $this->call(AyraManufacturersSeeder::class);
         $this->call(AyraSiteContentSeeder::class);
+        $this->call(AyraSiteBuilderSeeder::class);
     }
 }

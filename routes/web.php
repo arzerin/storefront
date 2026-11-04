@@ -22,6 +22,9 @@ use App\Http\Controllers\Admin\SiteSettingsController;
 use App\Http\Controllers\Admin\SiteBlockController;
 use App\Http\Controllers\Admin\FooterMenuController;
 use App\Actions\Webshop\HandleCheckoutSessionCompleted;
+use App\Http\Controllers\Admin\SiteBuilderController;
+use App\Http\Controllers\Admin\MediaLibraryController;
+use App\Http\Controllers\SitePageController;
 
 //Route::get('preview-email', function() {
 //    $cart = User::first()->cart;
@@ -91,6 +94,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/manufacturers/{manufacturer}/edit', [AdminManufacturerController::class, 'edit'])->name('manufacturers.edit');
         Route::put('/manufacturers/{manufacturer}', [AdminManufacturerController::class, 'update'])->name('manufacturers.update');
         Route::delete('/manufacturers/{manufacturer}', [AdminManufacturerController::class, 'destroy'])->name('manufacturers.destroy');
+        Route::get('/site-builder', [SiteBuilderController::class, 'index'])->name('site-builder.index');
+        Route::get('/site-builder/themes', [SiteBuilderController::class, 'themes'])->name('site-builder.themes');
+        Route::get('/site-builder/pages/create', [SiteBuilderController::class, 'create'])->name('site-builder.create');
+        Route::post('/site-builder/pages', [SiteBuilderController::class, 'store'])->name('site-builder.store');
+        Route::get('/site-builder/pages/{page}/edit', [SiteBuilderController::class, 'edit'])->name('site-builder.edit');
+        Route::put('/site-builder/pages/{page}', [SiteBuilderController::class, 'update'])->name('site-builder.update');
+        Route::post('/site-builder/pages/{page}/publish', [SiteBuilderController::class, 'publish'])->name('site-builder.publish');
+        Route::post('/site-builder/pages/{page}/restore/{revision}', [SiteBuilderController::class, 'restore'])->name('site-builder.restore');
+        Route::get('/site-builder/pages/{page}/preview', [SiteBuilderController::class, 'preview'])->name('site-builder.preview');
+        Route::delete('/site-builder/pages/{page}', [SiteBuilderController::class, 'destroy'])->name('site-builder.destroy');
+        Route::get('/media-library', [MediaLibraryController::class, 'index'])->name('media-library.index');
+        Route::post('/media-library', [MediaLibraryController::class, 'store'])->name('media-library.store');
+        Route::put('/media-library/{asset}', [MediaLibraryController::class, 'update'])->name('media-library.update');
+        Route::delete('/media-library/{asset}', [MediaLibraryController::class, 'destroy'])->name('media-library.destroy');
         Route::get('/site-settings', [SiteSettingsController::class, 'edit'])->name('site-settings.edit');
         Route::put('/site-settings', [SiteSettingsController::class, 'update'])->name('site-settings.update');
         Route::resource('blocks', SiteBlockController::class)->except('show');
@@ -102,3 +119,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
     });
 });
+
+Route::get('/{page:slug}', [SitePageController::class, 'show'])->where('page', '[a-z0-9-]+')->name('site-page.show');

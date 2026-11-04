@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Product;
 use App\Models\Collection as StoreCollection;
 use App\Models\Manufacturer;
+use App\Models\SitePage;
+use App\Support\SiteBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -16,6 +18,13 @@ use Livewire\WithPagination;
 class StoreFront extends Component
 {
     use WithPagination;
+
+    public ?int $previewPageId = null;
+
+    public function mount(?int $previewPageId = null): void
+    {
+        if ($previewPageId && auth('admin')->check()) $this->previewPageId = $previewPageId;
+    }
 
     #[Url(as: 'q')]
     public string $searchQuery = '';
@@ -64,7 +73,9 @@ class StoreFront extends Component
     #[Computed]
     public function products(): LengthAwarePaginator
     {
+        $selectedIds = collect($this->activeSections())->firstWhere('type', 'products')['data']['product_ids'] ?? [];
         return Product::query()->where('is_published', true)
+            ->when($selectedIds, fn ($query) => $query->whereIn('id', $selectedIds))
             ->when($this->searchQuery, fn ($query) => $query->where(function ($query) {
                 $term = '%'.trim($this->searchQuery).'%';
                 $query->where('name', 'like', $term)->orWhere('description', 'like', $term)->orWhere('category', 'like', $term);
@@ -136,8 +147,14 @@ class StoreFront extends Component
             ->sortBy(fn ($product) => array_search($product->id, $ids, true))->values();
     }
 
+    private function activeSections(): array
+    {
+        $page = $this->previewPageId ? SitePage::where('is_home', true)->find($this->previewPageId) : SitePage::where('is_home', true)->first();
+        return $this->previewPageId && $page ? $page->draft_sections : ($page?->publishedSections() ?: SiteBuilder::defaultHomeSections());
+    }
+
     public function render(): View
     {
-        return view('livewire.store-front');
+        return view('livewire.store-front', ['sections' => $this->activeSections()]);
     }
 }
