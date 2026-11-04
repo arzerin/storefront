@@ -2,6 +2,12 @@
 
 return [
 
+    'stripe_checkout' => [
+        'success_url' => env('STRIPE_SUCCESS_URL'),
+        'cancel_url' => env('STRIPE_CANCEL_URL'),
+        'shipping_rate_id' => env('STRIPE_SHIPPING_RATE_ID'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

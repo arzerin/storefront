@@ -4,6 +4,8 @@
             <x-authentication-card-logo />
         </x-slot>
 
+        <div class="auth-heading"><span class="eyebrow">WELCOME BACK</span><h1>Good to see you.</h1><p>Sign in to pick up where you left off.</p></div>
+
         <x-validation-errors class="mb-4" />
 
         @session('status')
