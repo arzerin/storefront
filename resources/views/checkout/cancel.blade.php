@@ -1,9 +1,1 @@
-<x-app-layout>
-    <section class="mx-auto max-w-2xl px-5 py-20 text-center text-slate-900 dark:text-slate-100">
-        <div class="mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-3xl text-amber-800" aria-hidden="true">↩</div>
-        <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-300">Checkout canceled</p>
-        <h1 class="mb-4 text-3xl font-semibold">Your bag is still here.</h1>
-        <p class="mx-auto max-w-lg text-slate-600 dark:text-slate-300">The checkout was canceled. You can return to your bag when you are ready.</p>
-        <a href="{{ route('cart.show') }}" class="mt-8 inline-flex rounded-md bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-700">Return to bag</a>
-    </section>
-</x-app-layout>
+<x-app-layout><div class="ayra-page ayra-result-page"><div class="ayra-result-card"><span class="ayra-result-icon failed">!</span><span class="ayra-eyebrow">AYRA · CHECKOUT UPDATE</span><h1>Payment not completed<span>.</span></h1><p>Your order was not placed through card checkout. Your items are still in your bag, so you can try again or choose cash on delivery.</p><div class="ayra-result-actions"><a href="{{ route('checkout.form') }}" class="ayra-button">Try another payment method →</a><a href="{{ route('cart.show') }}" class="ayra-outline-button">Return to bag</a></div><div class="ayra-result-help">Need help? You can review your bag and try again whenever you're ready.</div></div></div></x-app-layout>

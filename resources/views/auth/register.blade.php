@@ -4,7 +4,7 @@
             <x-authentication-card-logo />
         </x-slot>
 
-        <div class="auth-heading"><span class="eyebrow">JOIN NORTHLINE</span><h1>Make yourself at home.</h1><p>Create an account for a smoother shopping experience.</p></div>
+        <div class="auth-heading"><span class="eyebrow">JOIN AYRA</span><h1>Make yourself at home.</h1><p>Create an account for a smoother shopping experience.</p></div>
 
         <x-validation-errors class="mb-4" />
 

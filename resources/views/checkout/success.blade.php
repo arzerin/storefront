@@ -1,20 +1,12 @@
-<x-app-layout>
-    <section class="mx-auto max-w-2xl px-5 py-20 text-center text-slate-900 dark:text-slate-100">
-        <div class="mx-auto mb-7 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-800" aria-hidden="true">✓</div>
-        @if($order)
-            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Payment confirmed</p>
-            <h1 class="mb-4 text-3xl font-semibold">Thank you for your order.</h1>
-            <p class="mx-auto max-w-lg text-slate-600 dark:text-slate-300">Order #{{ $order->id }} is confirmed. You can review its details anytime.</p>
-            <a href="{{ route('order.show', $order->id) }}" class="mt-8 inline-flex rounded-md bg-emerald-700 px-6 py-3 font-semibold text-white hover:bg-emerald-800">View order</a>
-        @elseif($sessionId)
-            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Checkout received</p>
-            <h1 class="mb-4 text-3xl font-semibold">We are confirming your payment.</h1>
-            <p class="mx-auto max-w-lg text-slate-600 dark:text-slate-300">Your order will appear in My Orders after Stripe confirms it. Please check again shortly.</p>
-            <a href="{{ route('my.orders') }}" class="mt-8 inline-flex rounded-md bg-emerald-700 px-6 py-3 font-semibold text-white hover:bg-emerald-800">View my orders</a>
-        @else
-            <h1 class="mb-4 text-3xl font-semibold">Checkout status unavailable.</h1>
-            <p class="mx-auto max-w-lg text-slate-600 dark:text-slate-300">Open My Orders to see any confirmed purchases.</p>
-            <a href="{{ route('my.orders') }}" class="mt-8 inline-flex rounded-md bg-emerald-700 px-6 py-3 font-semibold text-white hover:bg-emerald-800">View my orders</a>
-        @endif
-    </section>
-</x-app-layout>
+<x-app-layout><div class="ayra-page ayra-result-page"><div class="ayra-result-card"><span class="ayra-result-icon success">✓</span><span class="ayra-eyebrow">AYRA · ORDER UPDATE</span>
+@if($order)
+    <h1>Order confirmed<span>.</span></h1><p>Thank you for shopping with Ayra. Order <strong>#{{ $order->id }}</strong> has been placed successfully.</p>
+    <div class="ayra-order-timeline"><div class="current"><i>✓</i><span>Order placed</span></div><div><i>2</i><span>Processing</span></div><div><i>3</i><span>Shipped</span></div><div><i>4</i><span>Delivered</span></div></div>
+    <div class="ayra-result-meta"><span>Payment<strong>{{ $order->payment_method === 'cod' ? 'Cash on Delivery' : 'Paid by card' }}</strong></span><span>Total<strong>{{ $order->amount_total }}</strong></span></div>
+    <div class="ayra-result-actions"><a href="{{ route('order.show', $order->id) }}" class="ayra-button">View your order →</a><a href="{{ route('home') }}#collection" class="ayra-outline-button">Continue shopping</a></div>
+@elseif($sessionId)
+    <h1>Confirming your order<span>.</span></h1><p>We're waiting for payment confirmation. Your order will appear in My Orders once confirmed.</p><div class="ayra-result-actions"><a href="{{ route('my.orders') }}" class="ayra-button">View my orders →</a></div>
+@else
+    <h1>Checkout status unavailable<span>.</span></h1><p>Visit My Orders to see your confirmed purchases.</p><div class="ayra-result-actions"><a href="{{ route('my.orders') }}" class="ayra-button">View my orders →</a></div>
+@endif
+</div></div></x-app-layout>

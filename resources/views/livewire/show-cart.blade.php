@@ -1,23 +1,12 @@
-<div class="cart-wrap">
-    <div class="crumbs"><a wire:navigate href="{{ route('home') }}">Shop all</a> / Your bag</div>
-    <h1 class="cart-title">Your bag<span class="brand-dot">.</span></h1>
+<div class="ayra-page ayra-cart-page">
+    <div class="ayra-breadcrumb"><a href="{{ route('home') }}">Home</a><span>›</span><strong>Your bag</strong></div>
+    <div class="ayra-page-heading"><span class="ayra-eyebrow">YOUR AYRA EDIT</span><h1>Your bag<span>.</span></h1><p>{{ $this->items->count() }} {{ \Illuminate\Support\Str::plural('piece', $this->items->count()) }} selected</p></div>
     @if($this->items->isEmpty())
-        <div class="cart-empty"><h2>Nothing in here yet.</h2><p>Find a new favorite from the collection.</p><a wire:navigate href="{{ route('home') }}" class="text-link">Continue shopping ↗</a></div>
+        <div class="ayra-empty"><h2>Your bag is waiting.</h2><p>Find pieces you'll want to live in.</p><a href="{{ route('home') }}#collection" class="ayra-button">Explore the collection ↗</a></div>
     @else
-        <div class="cart-layout">
-            <div class="cart-items">
-                @foreach($this->items as $item)
-                    <div class="cart-item" wire:key="cart-item-{{ $item->id }}">
-                        <a wire:navigate href="{{ route('product.show', $item->product) }}"><img src="{{ $item->product->featured_image?->path ?? '/media/example4.webp' }}" alt="{{ $item->product->name }}"></a>
-                        <div><span class="product-kicker">NORTHLINE ESSENTIALS</span><h2>{{ $item->product->name }}</h2><p>{{ $item->variant->size }} / {{ $item->variant->color }}</p><p>{{ $item->product->price }}</p><div class="quantity-control"><button wire:click="decrement({{ $item->id }})" @disabled($item->quantity == 1) aria-label="Decrease quantity">−</button><span>{{ $item->quantity }}</span><button wire:click="increment({{ $item->id }})" aria-label="Increase quantity">+</button></div></div>
-                        <div class="cart-item-end"><strong>{{ $item->subtotal }}</strong><button class="remove-button" wire:click="deleteItem({{ $item->id }})">Remove</button></div>
-                    </div>
-                @endforeach
-            </div>
-            <aside class="cart-summary"><h2>Order summary</h2><div class="summary-row"><span>Subtotal</span><strong>{{ $this->cart->total }}</strong></div><p>Shipping and taxes are calculated at checkout.</p>
-                @guest<p>Please <a class="text-link" href="{{ route('login') }}">sign in</a> or <a class="text-link" href="{{ route('register') }}">create an account</a> to continue.</p>@endguest
-                @auth<button wire:click="checkout" wire:loading.attr="disabled" class="primary-button">Continue to checkout ↗</button>@endauth
-            </aside>
-        </div>
+        <div class="ayra-cart-layout"><div class="ayra-cart-content">
+            <div class="ayra-cart-list">@foreach($this->items as $item)<div class="ayra-cart-item" wire:key="cart-item-{{ $item->id }}"><a href="{{ route('product.show', $item->product) }}" class="ayra-cart-photo"><img src="{{ $item->product->imageForColor($item->variant->color)?->path ?? '/media/ayra/sweater.webp' }}" alt="{{ $item->product->name }}"></a><div class="ayra-cart-item-main"><span class="ayra-product-label">{{ strtoupper($item->product->category ?? 'AYRA EDIT') }}</span><h2><a href="{{ route('product.show', $item->product) }}">{{ $item->product->name }}</a></h2><p>{{ $item->variant->color }} / {{ $item->variant->size }}</p><button type="button" wire:click="deleteItem({{ $item->id }})" class="ayra-inline-link">Remove</button></div><div class="ayra-cart-item-end"><strong>{{ $item->subtotal }}</strong><div class="ayra-quantity"><button wire:click="decrement({{ $item->id }})" @disabled($item->quantity == 1) aria-label="Decrease quantity">−</button><span>{{ $item->quantity }}</span><button wire:click="increment({{ $item->id }})" aria-label="Increase quantity">+</button></div></div></div>@endforeach</div>
+            @if($this->recommendations->isNotEmpty())<section class="ayra-pairs"><span class="ayra-eyebrow">THE PERFECT FINISH</span><h2>Pairs well with<span>.</span></h2><div class="ayra-pairs-grid">@foreach($this->recommendations as $recommendation)<div class="ayra-pair-card"><a href="{{ route('product.show', $recommendation) }}"><img src="{{ $recommendation->featured_image?->path ?? '/media/ayra/sweater.webp' }}" alt="{{ $recommendation->name }}"></a><div><strong>{{ $recommendation->name }}</strong><span>{{ $recommendation->price }}</span><button wire:click="addRecommendation({{ $recommendation->id }})" class="ayra-inline-link">+ Add to bag</button></div></div>@endforeach</div></section>@endif
+        </div><aside class="ayra-order-summary"><span class="ayra-eyebrow">ALMOST THERE</span><h2>Order summary</h2><div class="ayra-summary-row"><span>Subtotal</span><strong>{{ $this->cart->total }}</strong></div><div class="ayra-summary-row"><span>Shipping</span><span>Calculated at payment</span></div><div class="ayra-summary-total"><strong>Total today</strong><strong>{{ $this->cart->total }}</strong></div><p>You'll review your payment method and delivery details before placing your order.</p>@auth<button wire:click="checkout" class="ayra-button">Proceed to payment <span>→</span></button>@else<a href="{{ route('login') }}" class="ayra-button">Sign in to checkout <span>→</span></a>@endauth<a href="{{ route('home') }}#collection" class="ayra-summary-back">← Continue shopping</a><div class="ayra-summary-secure">◈ &nbsp; Secure card and cash on delivery options</div></aside></div>
     @endif
 </div>

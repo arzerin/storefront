@@ -14,7 +14,7 @@ class StripeEventListener
      */
     public function handle(WebhookReceived $event): void
     {
-        if($event->payload['type'] === 'checkout.session.completed') {
+        if(in_array($event->payload['type'], ['checkout.session.completed', 'checkout.session.async_payment_succeeded'], true)) {
             (new HandleCheckoutSessionCompleted())->handle($event->payload['data']['object']['id']);
         }
     }

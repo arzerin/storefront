@@ -4,78 +4,99 @@ namespace App\Actions\Webshop;
 
 use App\Mail\OrderConfirmation;
 use App\Models\Cart;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Cashier;
-use Stripe\Exception\ApiErrorException;
-use Stripe\LineItem;
 
 class HandleCheckoutSessionCompleted
 {
-    public function handle($sessionId): void
+    public function handle(string $sessionId, ?int $expectedUserId = null): ?Order
     {
-        DB::transaction(function () use ($sessionId) {
-            $session = Cashier::stripe()->checkout->sessions->retrieve($sessionId);
+        $stripe = Cashier::stripe();
+        $session = $stripe->checkout->sessions->retrieve($sessionId);
+        $userId = (int) ($session->metadata->user_id ?? 0);
+        $cartId = (int) ($session->metadata->cart_id ?? 0);
 
-            $user = User::find($session->metadata->user_id);
+        if ($session->status !== 'complete'
+            || ! in_array($session->payment_status, ['paid', 'no_payment_required'], true)
+            || $userId < 1
+            || ($expectedUserId !== null && $userId !== $expectedUserId)) {
+            return null;
+        }
 
-            $cart = Cart::find($session->metadata->cart_id);
+        $lineItems = $stripe->checkout->sessions->allLineItems($sessionId, ['limit' => 100]);
+        $items = collect($lineItems->data)->map(function ($line) use ($stripe) {
+            $product = $stripe->products->retrieve($line->price->product);
 
-            $order = $user->orders()->create([
-                'stripe_checkout_session_id' => $session->id,
-                'amount_shipping' => $session->total_details->amount_shipping,
-                'amount_discount' => $session->total_details->amount_discount,
-                'amount_tax' => $session->total_details->amount_tax,
-                'amount_subtotal' => $session->amount_subtotal,
-                'amount_total' => $session->amount_total,
-                'billing_address' => [
-                    'name' => $session->customer_details->name,
-                    'line1' => $session->customer_details->address->line1,
-                    'line2' => $session->customer_details->address->line2,
-                    'city' => $session->customer_details->address->city,
-                    'state' => $session->customer_details->address->state,
-                    'postal_code' => $session->customer_details->address->postal_code,
-                    'country' => $session->customer_details->address->country,
-                ],
-                'shipping_address' => [
-                    'name' => $session->shipping_details->name,
-                    'line1' => $session->shipping_details->address->line1,
-                    'line2' => $session->shipping_details->address->line2,
-                    'city' => $session->shipping_details->address->city,
-                    'state' => $session->shipping_details->address->state,
-                    'postal_code' => $session->shipping_details->address->postal_code,
-                    'country' => $session->shipping_details->address->country,
-                ]
+            return new OrderItem([
+                'product_variant_id' => $product->metadata->product_variant_id,
+                'name' => $product->name,
+                'description' => $product->description,
+                'price' => $line->price->unit_amount,
+                'quantity' => $line->quantity,
+                'amount_discount' => $line->amount_discount,
+                'amount_tax' => $line->amount_tax,
+                'amount_subtotal' => $line->amount_subtotal,
+                'amount_total' => $line->amount_total,
             ]);
-
-            $lineItems = Cashier::stripe()->checkout->sessions->allLineItems($session->id);
-
-            $orderItems = collect($lineItems->all())->map(function (LineItem $line) {
-                $product = Cashier::stripe()->products->retrieve($line->price->product);
-
-                return new OrderItem([
-                    'product_variant_id' => $product->metadata->product_variant_id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'price' => $line->price->unit_amount,
-                    'quantity' => $line->quantity,
-                    'amount_discount' => $line->amount_discount,
-                    'amount_tax' => $line->amount_tax,
-                    'amount_subtotal' => $line->amount_subtotal,
-                    'amount_total' => $line->amount_total,
-                ]);
-            });
-
-            $order->items()->saveMany($orderItems);
-
-            $cart->items()->delete();
-            $cart->delete();
-
-            Mail::to($user)->send(new OrderConfirmation($order));
         });
 
+        [$order, $created] = DB::transaction(function () use ($session, $sessionId, $userId, $cartId, $items) {
+            // Lock the shopper so a webhook and a browser return cannot create two orders.
+            $user = User::query()->lockForUpdate()->findOrFail($userId);
+            $existing = $user->orders()->where('stripe_checkout_session_id', $sessionId)->first();
+            if ($existing) {
+                return [$existing, false];
+            }
+
+            $order = $user->orders()->create([
+                'stripe_checkout_session_id' => $sessionId,
+                'payment_method' => 'card',
+                'payment_status' => 'paid',
+                'order_status' => 'pending',
+                'amount_shipping' => $session->total_details->amount_shipping ?? 0,
+                'amount_discount' => $session->total_details->amount_discount ?? 0,
+                'amount_tax' => $session->total_details->amount_tax ?? 0,
+                'amount_subtotal' => $session->amount_subtotal ?? 0,
+                'amount_total' => $session->amount_total ?? 0,
+                'billing_address' => $this->address($session->customer_details),
+                'shipping_address' => $this->address($session->shipping_details),
+            ]);
+            $order->items()->saveMany($items);
+
+            $cart = Cart::query()->whereKey($cartId)->where('user_id', $userId)->first();
+            if ($cart) {
+                $cart->items()->delete();
+                $cart->delete();
+            }
+
+            return [$order, true];
+        });
+
+        if ($created) {
+            try {
+                Mail::to($order->user)->send(new OrderConfirmation($order));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
+        return $order;
     }
 
+    private function address($details): array
+    {
+        return [
+            'name' => $details->name ?? null,
+            'line1' => $details->address->line1 ?? null,
+            'line2' => $details->address->line2 ?? null,
+            'city' => $details->address->city ?? null,
+            'state' => $details->address->state ?? null,
+            'postal_code' => $details->address->postal_code ?? null,
+            'country' => $details->address->country ?? null,
+        ];
+    }
 }

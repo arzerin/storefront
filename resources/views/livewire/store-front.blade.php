@@ -1,37 +1,62 @@
-<div>
-    <section class="hero">
-        <div class="hero-copy">
-            <span class="eyebrow light">THE EVERYDAY EDIT · 2026</span>
-            <h1>Good things.<br><em>Worn often.</em></h1>
-            <p>Easy pieces for the days that become your favorites. Made to fit into real life, beautifully.</p>
-            <a href="#collection" class="hero-button">Explore the collection <span aria-hidden="true">↗</span></a>
+<div class="ayra-home">
+    <section class="ayra-hero">
+        <div class="ayra-hero-photo"><img src="/media/ayra/hero.webp" alt="Ayra forest green wool coat styled for everyday life" fetchpriority="high"></div>
+        <div class="ayra-hero-copy">
+            <span class="ayra-eyebrow">AYRA · THE EVERYDAY EDIT</span>
+            <h1>Made for how<br>you move<span>.</span></h1>
+            <p>Considered pieces for workdays, weekends and everything in between.</p>
+            <div class="ayra-hero-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.7"/><path d="m16 16 5 5"/></svg>
+                <input wire:model.live.debounce.250ms="searchQuery" type="search" placeholder="Search coats, knitwear, accessories..." aria-label="Search products">
+                <a href="#collection" class="ayra-search-go" aria-label="See search results">→</a>
+                @if($this->suggestions->isNotEmpty())
+                    <div class="ayra-suggestions">
+                        @foreach($this->suggestions as $suggestion)
+                            <a href="{{ route('product.show', $suggestion) }}"><img src="{{ $suggestion->featured_image?->path ?? '/media/ayra/sweater.webp' }}" alt=""><span>{{ $suggestion->name }}</span><strong>{{ $suggestion->price }}</strong></a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+            <div class="ayra-quick-search"><span>EXPLORE</span><button wire:click="setCategory('Outerwear')" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Outerwear</button><button wire:click="setCategory('Knitwear')" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Knitwear</button><button wire:click="setCategory('Accessories')" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})">Accessories</button></div>
         </div>
-        <div class="hero-image" role="img" aria-label="Featured Northline sweater"></div>
-        <div class="hero-index">01 / 04 &nbsp;—&nbsp; THE COLLECTION</div>
     </section>
 
-    <section class="intro-strip" aria-label="Store highlights">
-        <span>Everyday essentials, considered.</span>
-        <span>Thoughtful details <b>✳</b> Easy to wear <b>✳</b> Yours to style</span>
+    <div class="ayra-benefits"><span>✦ &nbsp; Considered everyday style</span><span>◈ &nbsp; Secure checkout</span><span>♢ &nbsp; Curated essentials</span><span>◎ &nbsp; Card or cash on delivery</span></div>
+
+    <section class="ayra-section ayra-collections">
+        <div class="ayra-heading-row"><div><span class="ayra-eyebrow">CURATED FOR EVERY MOMENT</span><h2>Shop the collections<span>.</span></h2></div><a href="#collection" class="ayra-text-link">Explore all pieces <span>↗</span></a></div>
+        <div class="ayra-collection-grid">
+            @foreach([
+                ['Outerwear', 'Layers that last', '/media/ayra/coat.webp'],
+                ['Knitwear', 'Soft essentials', '/media/ayra/sweater.webp'],
+                ['Accessories', 'The finishing touch', '/media/ayra/tote.webp'],
+                ['Clothing', 'Everyday ease', '/media/ayra/trousers.webp'],
+            ] as [$label, $caption, $image])
+                <button type="button" wire:click="setCategory('{{ $label }}')" onclick="document.getElementById('collection').scrollIntoView({behavior:'smooth'})" class="ayra-collection-card">
+                    <img src="{{ $image }}" alt="" loading="lazy"><span class="ayra-collection-shade"></span><span class="ayra-collection-copy"><strong>{{ $label }}</strong><small>{{ $caption }}</small><i>Shop now ↗</i></span>
+                </button>
+            @endforeach
+        </div>
     </section>
 
-    <section id="collection" class="collection-section">
-        <div class="section-topline"><span class="eyebrow">CURATED FOR YOU</span><span class="eyebrow">NORTHLINE / 001</span></div>
-        <div class="collection-heading">
-            <div><h2>Wear it your way<span>.</span></h2><p>Discover the pieces you'll reach for again and again.</p></div>
-            <label class="search-field"><span class="sr-only">Search products</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"/><path d="m16 16 5 5"/></svg><input wire:model.live.debounce.300ms="searchQuery" type="search" placeholder="Search pieces"></label>
+    <section id="collection" class="ayra-section ayra-discovery">
+        <div class="ayra-heading-row"><div><span class="ayra-eyebrow">DISCOVER AYRA</span><h2>Picked for you<span>.</span></h2><p>Find your next favorite piece, your way.</p></div><div class="ayra-sort"><label for="sort-products">Sort by</label><select id="sort-products" wire:model.live="sort"><option value="featured">Featured</option><option value="newest">Newest</option><option value="price_low">Price: low to high</option><option value="price_high">Price: high to low</option></select></div></div>
+        <div class="ayra-discovery-layout">
+            <aside class="ayra-filter-panel"><div class="ayra-filter-top"><strong>Filters</strong><button wire:click="clearFilters">Clear all</button></div>
+                <div class="ayra-filter-group"><h3>Category</h3>@foreach($this->categories as $option)<label><input type="radio" wire:model.live="category" value="{{ $option }}"><span>{{ $option }}</span></label>@endforeach</div>
+                <div class="ayra-filter-group"><h3>Color</h3><div class="ayra-filter-swatches">@foreach($this->colors as $option)<button type="button" wire:click="$set('color', '{{ $option }}')" class="{{ $color === $option ? 'selected' : '' }}" title="{{ $option }}" aria-label="Filter color {{ $option }}" aria-pressed="{{ $color === $option ? 'true' : 'false' }}" style="--swatch:{{ \App\Models\ProductVariant::swatchColor($option) }}"></button>@endforeach</div>@if($color)<p class="ayra-filter-value">{{ $color }} <button wire:click="$set('color', '')" aria-label="Clear color">×</button></p>@endif</div>
+                <div class="ayra-filter-group"><h3>Size</h3><div class="ayra-size-filter">@foreach($this->sizes as $option)<button wire:click="$set('size', '{{ $option }}')" class="{{ $size === $option ? 'selected' : '' }}">{{ $option }}</button>@endforeach</div></div>
+            </aside>
+            <div class="ayra-products-column"><div class="ayra-results-line"><span>{{ $this->products->total() }} {{ \Illuminate\Support\Str::plural('piece', $this->products->total()) }}</span>@if($category || $color || $size || $searchQuery)<button wire:click="clearFilters">Reset filters ×</button>@endif</div>
+                <div class="ayra-product-grid">
+                    @forelse($this->products as $product)
+                        <a href="{{ route('product.show', $product) }}" class="ayra-product-card" wire:key="product-{{ $product->id }}"><div class="ayra-product-image"><img src="{{ $product->featured_image?->path ?? '/media/ayra/sweater.webp' }}" alt="{{ $product->name }}" loading="lazy"><span>Explore piece ↗</span></div><div class="ayra-product-meta"><small>{{ strtoupper($product->category ?? 'AYRA EDIT') }}</small><h3>{{ $product->name }}</h3><strong>{{ $product->price }}</strong></div><div class="ayra-card-swatches">@foreach($product->variants->pluck('color')->filter()->unique()->take(4) as $swatch)<i title="{{ $swatch }}" style="background:{{ \App\Models\ProductVariant::swatchColor($swatch) }}"></i>@endforeach</div></a>
+                    @empty
+                        <div class="ayra-empty"><h3>No pieces found</h3><p>Try another search or clear the filters.</p><button wire:click="clearFilters" class="ayra-button">Show all pieces</button></div>
+                    @endforelse
+                </div><div class="ayra-pagination">{{ $this->products->links() }}</div>
+            </div>
+            <aside class="ayra-recent-panel"><div class="ayra-filter-top"><strong>Recently viewed</strong></div>@forelse($this->recentlyViewed as $recent)<a href="{{ route('product.show', $recent) }}"><img src="{{ $recent->featured_image?->path ?? '/media/ayra/sweater.webp' }}" alt=""><span>{{ $recent->name }}<strong>{{ $recent->price }}</strong></span></a>@empty<p>Pieces you explore will appear here for easy access.</p>@endforelse</aside>
         </div>
-        <div class="product-grid">
-            @forelse($this->products as $product)
-                <a wire:navigate href="{{ route('product.show', $product) }}" class="product-card">
-                    <div class="product-media"><img src="{{ $product->featured_image?->path ?? '/media/example4.webp' }}" alt="{{ $product->name }}" loading="lazy"><span class="product-quick">Discover piece <span>↗</span></span></div>
-                    <div class="product-meta"><div><span class="product-kicker">NORTHLINE ESSENTIALS</span><h3>{{ $product->name }}</h3></div><span class="product-price">{{ $product->price }}</span></div>
-                </a>
-            @empty
-                <div class="empty-state"><h3>No pieces found.</h3><p>Try another search to explore the collection.</p></div>
-            @endforelse
-        </div>
-        <div class="pagination-wrap">{{ $this->products->links() }}</div>
     </section>
-    <section class="closing-note"><span class="eyebrow">THE NORTHLINE POINT OF VIEW</span><p>Less fuss. More feeling.<br><em>Always you.</em></p></section>
 </div>

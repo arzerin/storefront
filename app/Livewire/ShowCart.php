@@ -2,12 +2,11 @@
 
 namespace App\Livewire;
 
-use App\Actions\Webshop\CreateStripeCheckoutSession;
 use App\Factories\CartFactory;
 use App\Models\Cart;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\View\View;
-use Laravel\Cashier\Checkout;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -22,7 +21,23 @@ class ShowCart extends Component
     #[Computed]
     public function items(): Collection
     {
-        return CartFactory::make()->items()->with(['variant', 'product'])->get();
+        return CartFactory::make()->items()->with(['variant', 'product.images'])->get();
+    }
+
+    #[Computed]
+    public function recommendations(): Collection
+    {
+        $productIds = $this->items->pluck('product.id')->filter()->all();
+
+        return Product::where('is_published', true)->whereNotIn('id', $productIds)
+            ->with(['featured_image', 'variants'])->limit(3)->get();
+    }
+
+    public function addRecommendation(int $productId): void
+    {
+        $variant = Product::where('is_published', true)->findOrFail($productId)->variants()->firstOrFail();
+        app(\App\Actions\Webshop\AddProductVariantToCart::class)->add($variant->id);
+        $this->dispatch('product.added');
     }
 
     public function increment($itemId): void
@@ -49,9 +64,9 @@ class ShowCart extends Component
         $this->dispatch('product.deleted');
     }
 
-    public function checkout(CreateStripeCheckoutSession $checkoutSession): Checkout
+    public function checkout()
     {
-        return $checkoutSession->createFromCart($this->cart);
+        return $this->redirectRoute('checkout.form');
     }
 
     public function render(): View

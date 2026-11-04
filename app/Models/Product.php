@@ -32,4 +32,12 @@ class Product extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    public function imageForColor(?string $color): ?Image
+    {
+        $images = $this->relationLoaded('images') ? $this->images : $this->images()->get();
+
+        return $images->first(fn (Image $image) => $image->color === $color)
+            ?? $images->first(fn (Image $image) => $image->color === null);
+    }
 }

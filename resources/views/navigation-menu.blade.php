@@ -1,25 +1,2 @@
-<nav class="site-nav" x-data="{ open: false }">
-    <div class="nav-inner">
-        <a wire:navigate href="{{ route('home') }}" class="brand" aria-label="Northline home">NORTHLINE<span class="brand-dot">.</span></a>
-        <div class="nav-links">
-            <a wire:navigate href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Shop all</a>
-            @auth
-                <a wire:navigate href="{{ route('my.orders') }}" class="{{ request()->routeIs('my.orders') ? 'active' : '' }}">My orders</a>
-                @can('manage-products')<a wire:navigate href="{{ route('admin.products') }}">Admin</a>@endcan
-            @endauth
-        </div>
-        <div class="nav-actions">
-            @guest<a href="{{ route('login') }}" class="account-link">Sign in</a>@endguest
-            @auth<a href="{{ route('profile.show') }}" class="account-link">Account</a>@endauth
-            @livewire('navigation-cart')
-            <button class="menu-toggle" type="button" @click="open = !open" aria-label="Toggle menu" :aria-expanded="open.toString()">
-                <span></span><span></span>
-            </button>
-        </div>
-    </div>
-    <div class="mobile-menu" x-show="open" x-cloak>
-        <a wire:navigate href="{{ route('home') }}">Shop all</a>
-        @auth<a wire:navigate href="{{ route('my.orders') }}">My orders</a>@can('manage-products')<a wire:navigate href="{{ route('admin.products') }}">Admin</a>@endcan<a href="{{ route('profile.show') }}">Account</a>@endauth
-        @guest<a href="{{ route('login') }}">Sign in</a><a href="{{ route('register') }}">Create account</a>@endguest
-    </div>
-</nav>
+<nav class="ayra-nav" x-data="{ open: false }"><div class="ayra-nav-inner"><a href="{{ route('home') }}" class="ayra-brand" aria-label="Ayra home">AYRA<span>.</span></a><div class="ayra-nav-links"><a href="{{ route('home') }}#collection">Shop all</a><a href="{{ route('home') }}?category=Outerwear#collection">Outerwear</a><a href="{{ route('home') }}?category=Knitwear#collection">Knitwear</a><a href="{{ route('home') }}?category=Accessories#collection">Accessories</a>@if(auth('admin')->check())<a href="{{ route('admin.products.index') }}">Studio</a>@endif</div><div class="ayra-nav-actions"><a href="{{ route('home') }}#collection" class="ayra-nav-icon" aria-label="Search products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.7" cy="10.7" r="6.5"/><path d="m16 16 5 5"/></svg></a>@auth<a href="{{ route('my.orders') }}" class="ayra-nav-icon" aria-label="My orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="7" r="3.5"/><path d="M4.5 21c.5-4.5 3-6.5 7.5-6.5s7 2 7.5 6.5"/></svg></a>@else<a href="{{ route('login') }}" class="ayra-nav-icon" aria-label="Sign in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="7" r="3.5"/><path d="M4.5 21c.5-4.5 3-6.5 7.5-6.5s7 2 7.5 6.5"/></svg></a>@endauth@livewire('navigation-cart')<button type="button" class="ayra-menu-toggle" @click="open = !open" aria-label="Open menu" :aria-expanded="open.toString()"><span></span><span></span><span></span></button></div></div><div class="ayra-mobile-menu" x-show="open" x-cloak><a href="{{ route('home') }}#collection">Shop all</a><a href="{{ route('home') }}?category=Outerwear#collection">Outerwear</a><a href="{{ route('home') }}?category=Knitwear#collection">Knitwear</a><a href="{{ route('home') }}?category=Accessories#collection">Accessories</a>@auth<a href="{{ route('my.orders') }}">My orders</a>@if(auth('admin')->check())<a href="{{ route('admin.products.index') }}">Manage products</a>@endif
+@else<a href="{{ route('login') }}">Sign in</a>@endauth</div></nav>
