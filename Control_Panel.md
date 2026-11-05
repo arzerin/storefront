@@ -60,6 +60,8 @@ Admin authentication uses the separate `admins` table, `App\Models\Admin`, and t
 | `GET /admin/manufacturers/{manufacturer}/edit` | `admin.manufacturers.edit` | `Admin\ManufacturerController::edit()` | Manufacturer editor |
 | `PUT /admin/manufacturers/{manufacturer}` | `admin.manufacturers.update` | `Admin\ManufacturerController::update()` | Updates the manufacturer's name and description |
 | `DELETE /admin/manufacturers/{manufacturer}` | `admin.manufacturers.destroy` | `Admin\ManufacturerController::destroy()` | Removes the manufacturer; products remain and become unassigned |
+| `GET /admin/prices` | `admin.prices.index` | `Admin\PriceManagerController::index()` | Searchable, category-filtered one-page price manager |
+| `POST /admin/prices` | `admin.prices.update` | `Admin\PriceManagerController::update()` | Validates the reviewed batch and saves all changed prices and sale schedules in one transaction |
 | `GET /admin/products` | `admin.products.index` | `Admin\ProductController::index()` | `admin.products.index`; searchable, paginated list |
 | `GET /admin/products/create` | `admin.products.create` | `Admin\ProductController::create()` | `admin.products.form` in create mode |
 | `POST /admin/products` | `admin.products.store` | `Admin\ProductController::store()` → private `save()` | Validates, creates product/variants/images, redirects to edit |
@@ -67,6 +69,8 @@ Admin authentication uses the separate `admins` table, `App\Models\Admin`, and t
 | `PUT /admin/products/{product}` | `admin.products.update` | `Admin\ProductController::update()` → private `save()` | Updates name, description, category, price, publication, variants, and images |
 
 AdminLTE styling is isolated in `layouts.admin`, `resources/css/admin.css`, and `resources/js/admin.js`. Product photos are stored on the `public` filesystem disk and served through `public/storage`. The product form loads category and manufacturer options from their tables and validates the selections. It also stores sale dates, a sale/quantity interaction mode, and quantity discount tiers. The editor refuses to remove a variant already referenced by a bag or order. Collections use a many-to-many product relation and do not change a product's reporting category.
+
+The price manager edits regular price, sale price, start and end times, and the sale/quantity interaction mode inline. Its JavaScript shows the changed products and old/new values before submission. The controller rejects stale or invalid batches atomically. `Product::activeSalePriceCents()` checks sale dates whenever prices are read, so a scheduled sale starts and ends automatically without a cron job; after the exclusive end time, the regular price is used again. The admin date inputs use the application timezone shown on the page.
 
 ## Framework routes and events
 
@@ -138,7 +142,10 @@ For installation and scaffolding commands, see `cmd.md`.
 | Route | Function | Purpose |
 | --- | --- | --- |
 | `GET /admin/site-builder` | `SiteBuilderController@index` | List homepage and content pages. |
-| `GET /admin/site-builder/themes` | `SiteBuilderController@themes` | Show installed Ayra theme and page templates. |
+| `GET /admin/site-builder/themes` | `SiteBuilderController@themes` | Show installed storefront themes, active theme, thumbnails and page templates. |
+| `POST /admin/site-builder/themes` | `ThemeController@install` | Validate and install an inactive theme ZIP. |
+| `POST /admin/site-builder/themes/{theme}/activate` | `ThemeController@activate` | Set the active theme for all customer pages. |
+| `GET /theme-assets/{theme}/{asset}` | Route closure + `StoreTheme::asset` | Serve theme CSS or a thumbnail from a validated theme folder. |
 | `GET /admin/site-builder/pages/create` | `SiteBuilderController@create` | New page form. |
 | `POST /admin/site-builder/pages` | `SiteBuilderController@store` | Create a draft page from a template. |
 | `GET /admin/site-builder/pages/{page}/edit` | `SiteBuilderController@edit` | Section editor. |
@@ -154,4 +161,4 @@ For installation and scaffolding commands, see `cmd.md`.
 | `GET /{page:slug}` | `SitePageController@show` | Render a published content page. |
 | `GET /` | `StoreFront@render` | Render the published homepage sections with live catalogue filters. |
 
-`SiteBuilder` validates allowed section types and reserved paths. `SitePage` stores drafts; `SitePageRevision` stores published snapshots. The active theme manifest and page templates are in `resources/themes/ayra/`. `MediaAsset` supplies images and alt text to page sections and `SiteBlock` records. Commerce routes remain ahead of the content-page route.
+`SiteBuilder` validates allowed section types and reserved paths. `SitePage` stores drafts; `SitePageRevision` stores published snapshots. Page template views remain in `resources/themes/ayra/`. `StoreTheme` reads `theme.info.json`, selects the active theme through `SiteSetting.active_theme`, and loads its CSS after the base CSS in storefront and guest layouts. Built-in themes live in `resources/themes/ayra/` and `resources/themes/bold-contemporary/`; installed ZIP themes live in `storage/app/themes/`. `MediaAsset` supplies images and alt text to page sections and `SiteBlock` records. Commerce routes remain ahead of the content-page route.

@@ -49,6 +49,7 @@ These examples create the kinds of controllers, models, migrations, middleware, 
 # Admin controllers, middleware, and separate admin model/table
 php artisan make:controller Admin/AuthController
 php artisan make:controller Admin/ProductController
+php artisan make:controller Admin/PriceManagerController
 php artisan make:middleware EnsureAdminAuthenticated
 php artisan make:model Admin -m
 
@@ -102,6 +103,7 @@ php artisan make:view layouts.admin
 php artisan make:view admin.login
 php artisan make:view admin.products.index
 php artisan make:view admin.products.form
+php artisan make:view admin.prices.index
 php artisan make:view admin.categories.index
 php artisan make:view admin.categories.edit
 php artisan make:view admin.collections.index
@@ -113,6 +115,8 @@ php artisan make:view checkout.cancel
 ```
 
 The `App\Actions\Webshop` classes are this project's service layer; there is no separate `app/Services` directory. The actual code also defines model relationships, route declarations, validation, authentication guards, image uploads, and the Stripe listener registration through Laravel's event discovery. Generators create stubs only.
+
+The price manager uses the existing `sale_price`, `sale_starts_at`, `sale_ends_at`, and `discount_mode` columns from `database/migrations/2026_11_05_020000_add_product_pricing_and_collections.php`; no additional migration or scheduler command is needed for timed sales.
 
 ## Admin account provisioning
 
@@ -182,3 +186,14 @@ php artisan test tests/Feature/SiteBuilderTest.php
 ```
 
 The builder uses `site_pages`, `site_page_revisions`, and `media_assets`. Uploads go to the public disk under `storage/app/public/site-builder`; the media library also indexes existing `public/media/ayra` images. Page templates live in `resources/themes/ayra/views/site-builder/pages`, with metadata in `resources/themes/ayra/theme.php`. The old code is preserved on branch `codex/pre-site-builder-2026-11-05`; rollback notes and the pre-builder site-content snapshot are in `/Users/jerin/Herd/webshop-backups/site-builder-2026-11-05/`.
+
+## Storefront themes
+
+```bash
+# Theme ZIP installation requires PHP's zip extension.
+php -m | grep '^zip$'
+php artisan test tests/Feature/StoreThemeTest.php
+npm run build
+```
+
+Use `/admin/site-builder/themes` to install a ZIP and activate it. Each theme contains `theme.info.json`, `theme.css`, and optionally a thumbnail and `assets/` images or WOFF2 fonts. The CSS is served without a build step through `/theme-assets/{theme}/theme.css`; the base CSS still needs `npm run build` after code changes. Built-in themes are in `resources/themes/`; uploaded themes are saved in `storage/app/themes/`. The active slug is stored in the existing `site_settings` table, so no theme migration is needed. See `resources/themes/README.md` for a complete theme example and CSS hooks. Switch back to **Smart-minima-commerce** in the admin to restore the original appearance.

@@ -84,6 +84,7 @@ class StoreTheme
                 $entries[$base] = $name;
             }
             if (! isset($entries['theme.info.json'], $entries['theme.css'])) throw ValidationException::withMessages(['theme_zip' => 'theme.info.json and theme.css are required.']);
+            if (count(array_filter(array_keys($entries), fn (string $name) => str_starts_with($name, 'thumbnail.'))) > 1) throw ValidationException::withMessages(['theme_zip' => 'Include only one thumbnail.']);
             $manifest = json_decode((string) $zip->getFromName($entries['theme.info.json']), true);
             $slug = $manifest['slug'] ?? null;
             if (! is_string($slug) || ! preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug) || in_array($slug, [self::DEFAULT, 'bold-contemporary'], true) || self::root($slug)) throw ValidationException::withMessages(['theme_zip' => 'Choose a unique lowercase theme slug.']);

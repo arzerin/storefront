@@ -15,6 +15,7 @@ use App\Livewire\{CheckoutStatus,
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\PriceManagerController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CollectionController as AdminCollectionController;
 use App\Http\Controllers\Admin\ManufacturerController as AdminManufacturerController;
@@ -24,6 +25,8 @@ use App\Http\Controllers\Admin\FooterMenuController;
 use App\Actions\Webshop\HandleCheckoutSessionCompleted;
 use App\Http\Controllers\Admin\SiteBuilderController;
 use App\Http\Controllers\Admin\MediaLibraryController;
+use App\Http\Controllers\Admin\ThemeController;
+use App\Support\StoreTheme;
 use App\Http\Controllers\SitePageController;
 
 //Route::get('preview-email', function() {
@@ -32,6 +35,12 @@ use App\Http\Controllers\SitePageController;
 //});
 
 Route::get('/', StoreFront::class)->name('home');
+Route::get('/theme-assets/{theme}/{asset}', function (string $theme, string $asset) {
+    $path = StoreTheme::asset($theme, $asset);
+    abort_unless($path, 404);
+    $mime = $asset === 'theme.css' ? 'text/css; charset=UTF-8' : (str_ends_with($asset, '.woff2') ? 'font/woff2' : mime_content_type($path));
+    return response()->file($path, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'public, max-age=3600']);
+})->where(['theme' => '[a-z0-9-]+', 'asset' => 'theme\\.css|thumbnail\\.(?:png|jpe?g|webp)|assets/[a-z0-9-]+\\.(?:png|jpe?g|webp|woff2)'])->name('theme.asset');
 Route::get('/collections/{collection:slug}', function (Collection $collection) {
     abort_unless($collection->is_published, 404);
     return redirect()->route('home', ['collection' => $collection->slug])->withFragment('collection');
@@ -96,6 +105,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/manufacturers/{manufacturer}', [AdminManufacturerController::class, 'destroy'])->name('manufacturers.destroy');
         Route::get('/site-builder', [SiteBuilderController::class, 'index'])->name('site-builder.index');
         Route::get('/site-builder/themes', [SiteBuilderController::class, 'themes'])->name('site-builder.themes');
+        Route::post('/site-builder/themes', [ThemeController::class, 'install'])->name('site-builder.themes.install');
+        Route::post('/site-builder/themes/{theme}/activate', [ThemeController::class, 'activate'])->name('site-builder.themes.activate');
         Route::get('/site-builder/pages/create', [SiteBuilderController::class, 'create'])->name('site-builder.create');
         Route::post('/site-builder/pages', [SiteBuilderController::class, 'store'])->name('site-builder.store');
         Route::get('/site-builder/pages/{page}/edit', [SiteBuilderController::class, 'edit'])->name('site-builder.edit');
@@ -112,6 +123,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/site-settings', [SiteSettingsController::class, 'update'])->name('site-settings.update');
         Route::resource('blocks', SiteBlockController::class)->except('show');
         Route::resource('footer-menu', FooterMenuController::class)->parameters(['footer-menu' => 'item'])->except('show');
+        Route::get('/prices', [PriceManagerController::class, 'index'])->name('prices.index');
+        Route::post('/prices', [PriceManagerController::class, 'update'])->name('prices.update');
         Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
         Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
         Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');

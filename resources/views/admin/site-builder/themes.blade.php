@@ -28,7 +28,8 @@
 <div id="theme-guide" class="card mb-4"><div class="card-body"><h4>Theme package format</h4><pre class="admin-theme-code">my-theme/
 ├── theme.info.json
 ├── theme.css
-└── thumbnail.webp (optional)</pre><p class="mb-2"><code>theme.info.json</code></p><pre class="admin-theme-code">{
+├── thumbnail.webp (optional)
+└── assets/ (optional images and WOFF2 fonts)</pre><p class="mb-2"><code>theme.info.json</code></p><pre class="admin-theme-code">{
   "slug": "my-theme",
   "name": "My theme",
   "author": "Your studio",

@@ -60,3 +60,13 @@
 .ayra-builder-header-text>div{max-width:900px;margin:auto;text-align:center}
 .ayra-builder-header-text h2{margin:0 0 20px;color:var(--ayra-deep);font-size:clamp(34px,4vw,56px);line-height:1.12;letter-spacing:-.05em}
 .ayra-builder-header-text p{margin:0;color:#53665a;font-size:clamp(16px,1.35vw,19px);line-height:1.75}
+
+/* Keep cart prices and quantity controls clear of the product image at narrow widths. */
+.ayra-cart-item-main,.ayra-cart-item-end{min-width:0}
+.ayra-cart-item-main h2{overflow-wrap:anywhere}
+@media(max-width:650px){
+    .ayra-cart-item{grid-template-columns:85px minmax(0,1fr)}
+    .ayra-cart-item-end{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;text-align:left}
+    .ayra-cart-item-end strong{white-space:nowrap}
+    .ayra-cart-item-end .ayra-quantity{flex:none;margin-left:auto}
+}

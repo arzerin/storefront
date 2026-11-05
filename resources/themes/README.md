@@ -7,6 +7,9 @@ my-theme/
   theme.info.json
   theme.css
   thumbnail.webp
+  assets/
+    campaign.webp
+    brand.woff2
 ```
 
 `theme.info.json` is a Drupal-style information file in JSON. The required fields are `slug`, `name`, `author`, and `description`. `slug` must be lowercase words separated by hyphens and must be unique. `version` and `thumbnail` are optional. When set, `thumbnail` must name a valid `thumbnail.png`, `thumbnail.jpg`, `thumbnail.jpeg`, or `thumbnail.webp` in the ZIP.
@@ -22,7 +25,7 @@ my-theme/
 }
 ```
 
-The ZIP can contain only the manifest, CSS and one thumbnail. PHP, Blade, JavaScript and arbitrary files are rejected. Themes are installed inactive. Activate a theme in the admin to use it site-wide. The active slug is stored in `site_settings`; switching back to **Smart-minima-commerce** restores the original appearance. Theme styles do not alter product or page data.
+The ZIP can contain the manifest, CSS, one thumbnail, and up to 50 total files including images (`.png`, `.jpg`, `.jpeg`, `.webp`) or WOFF2 fonts in `assets/`. PHP, Blade, JavaScript and arbitrary files are rejected. Themes are installed inactive. Activate a theme in the admin to use it site-wide. The active slug is stored in `site_settings`; switching back to **Smart-minima-commerce** restores the original appearance. Theme styles do not alter product or page data.
 
 `theme.css` loads after `resources/css/app.css` and `resources/css/ayra.css` on storefront pages. It also loads after the base account styles on login and registration pages. The base styles supply layout and responsive behavior, so theme CSS can focus on visual changes. A theme may override every component; these hooks are a useful starting point:
 
@@ -39,6 +42,8 @@ The ZIP can contain only the manifest, CSS and one thumbnail. PHP, Blade, JavaSc
 .ayra-nav { background: #202020; color: #fff; }
 .ayra-nav .ayra-brand, .ayra-nav-links a { color: #fff; }
 .ayra-footer { background: #202020; color: #fff; }
+.ayra-hero-copy { background-image: url('assets/campaign.webp'); }
+@font-face { font-family: 'Brand'; src: url('assets/brand.woff2') format('woff2'); }
 
 /* Homepage hero, collection, filters and product cards */
 .ayra-hero-copy { background: #202020; color: #fff; }
@@ -62,4 +67,4 @@ body.store-body .auth-side { background: #202020; }
 body.store-body .auth-card button[type=submit] { background: #f06b54; }
 ```
 
-When overriding a dark background, also set text, link, and button colors so they remain readable. Built-in Bold contemporary is a complete example in `resources/themes/bold-contemporary/theme.css`. Theme assets are served at `/theme-assets/{slug}/theme.css` and `/theme-assets/{slug}/thumbnail.webp` (or the matching image extension); no asset build is needed for an uploaded theme.
+When overriding a dark background, also set text, link, and button colors so they remain readable. Built-in Bold contemporary is a complete example in `resources/themes/bold-contemporary/theme.css`. Theme assets are served at `/theme-assets/{slug}/theme.css`, `/theme-assets/{slug}/thumbnail.webp`, and `/theme-assets/{slug}/assets/{filename}`; no asset build is needed for an uploaded theme.
