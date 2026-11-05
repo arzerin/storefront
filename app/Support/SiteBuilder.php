@@ -13,6 +13,7 @@ class SiteBuilder
     public const TYPES = [
         'hero' => 'Hero', 'benefits' => 'Benefits strip', 'image_text' => 'Image + text',
         'collections' => 'Collections', 'products' => 'Products', 'faq' => 'FAQs',
+        'free_text' => 'Free Text', 'header_text' => 'Header with text',
     ];
     public const RESERVED = ['admin', 'api', 'cart', 'checkout', 'checkout-status', 'collections', 'dashboard', 'forgot-password', 'home', 'login', 'logout', 'my-orders', 'order', 'products', 'register', 'reset-password', 'storage', 'two-factor-challenge', 'user'];
 
@@ -47,6 +48,8 @@ class SiteBuilder
             'collections' => ['eyebrow' => '', 'headline' => 'Explore collections', 'collection_ids' => []],
             'products' => ['eyebrow' => '', 'headline' => 'Explore products', 'product_ids' => []],
             'faq' => ['headline' => 'Frequently asked questions', 'items' => [['question' => 'Your question', 'answer' => 'Your answer']]],
+            'free_text' => ['body' => 'Add your text here.'],
+            'header_text' => ['headline' => 'Your heading', 'body' => 'Add your supporting text here.'],
             default => throw new \InvalidArgumentException('Unknown section type.'),
         };
         return ['id' => (string) Str::uuid(), 'type' => $type, 'data' => $data];
@@ -68,6 +71,8 @@ class SiteBuilder
                 'collections' => ['eyebrow' => ['nullable','string','max:100'], 'headline' => ['required','string','max:160'], 'collection_ids' => ['nullable','array','max:12'], 'collection_ids.*' => ['integer',Rule::exists('collections','id')]],
                 'products' => ['eyebrow' => ['nullable','string','max:100'], 'headline' => ['required','string','max:160'], 'product_ids' => ['nullable','array','max:12'], 'product_ids.*' => ['integer',Rule::exists('products','id')]],
                 'faq' => ['headline' => ['required','string','max:160'], 'items' => ['required','array','min:1','max:20'], 'items.*.question' => ['required','string','max:200'], 'items.*.answer' => ['required','string','max:1000']],
+                'free_text' => ['body' => ['required','string','max:12000']],
+                'header_text' => ['headline' => ['required','string','max:160'], 'body' => ['required','string','max:5000']],
             };
             $clean = validator($data, $rules)->validate();
             if (isset($clean['image_path']) && ! str_starts_with($clean['image_path'], '/media/') && ! str_starts_with($clean['image_path'], '/storage/')) {

@@ -5,9 +5,12 @@
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><meta name="theme-color" content="#173b2a">
     <title>{{ $pageTitle ? $pageTitle.' · ' : '' }}{{ \App\Models\SiteSetting::getValue('site_name', 'Ayra') }} — {{ \App\Models\SiteSetting::getValue('tagline', 'Made for how you move.') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/css/ayra.css', 'resources/js/app.js']) @livewireStyles
+    @vite(['resources/css/app.css', 'resources/css/ayra.css', 'resources/js/app.js'])
+    @php($activeTheme = \App\Support\StoreTheme::activeSlug())
+    <link rel="stylesheet" href="{{ route('theme.asset', ['theme' => $activeTheme, 'asset' => 'theme.css', 'v' => filemtime(\App\Support\StoreTheme::asset($activeTheme, 'theme.css'))]) }}">
+    @livewireStyles
 </head>
-<body class="ayra-body"><x-banner /><div class="ayra-shell">
+<body class="ayra-body" data-theme="{{ $activeTheme }}"><x-banner /><div class="ayra-shell">
     @livewire('navigation-menu')
     @if(isset($header))<header class="ayra-page-header">{{ $header }}</header>@endif
     <main>{{ $slot }}</main>

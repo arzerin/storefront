@@ -91,6 +91,9 @@ class ProductController extends Controller
         if (isset($data['sale_price']) && (float) $data['sale_price'] >= (float) $data['price']) {
             throw ValidationException::withMessages(['sale_price' => 'Sale price must be below the regular price.']);
         }
+        if (! isset($data['sale_price']) && (! empty($data['sale_starts_at']) || ! empty($data['sale_ends_at']))) {
+            throw ValidationException::withMessages(['sale_price' => 'Enter a sale price for the scheduled dates.']);
+        }
 
         $tiers = collect(preg_split('/\r\n|\r|\n/', trim($data['quantity_discounts'] ?? '')))
             ->filter()->map(function (string $line) {

@@ -10,6 +10,7 @@ use App\Models\SitePage;
 use App\Models\SiteBlock;
 use App\Models\SitePageRevision;
 use App\Support\SiteBuilder;
+use App\Support\StoreTheme;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +27,7 @@ class SiteBuilderController extends Controller
 
     public function themes(): View
     {
-        return view('admin.site-builder.themes', ['theme' => SiteBuilder::theme()]);
+        return view('admin.site-builder.themes', ['themes' => StoreTheme::all(), 'activeTheme' => StoreTheme::activeSlug(), 'templates' => SiteBuilder::templates()]);
     }
 
     public function create(): View

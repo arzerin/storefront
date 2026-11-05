@@ -20,3 +20,29 @@ body.admin-body { font-family: Inter, system-ui, sans-serif; }
 .admin-body .table td, .admin-body .table th { vertical-align: middle; }
 .admin-login { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at top left, #dce9d4, #f7f9f5 45%, #e7eee8); }
 .admin-login .card { width: min(100%, 430px); }
+
+/* One-page pricing review. */
+.admin-body .price-manager-table{min-width:1180px}
+.admin-body .price-manager-table th{white-space:nowrap;font-size:.77rem;color:#637269}
+.admin-body .price-manager-table td{min-width:142px}
+.admin-body .price-manager-table td:first-child{min-width:220px}
+.admin-body .price-manager-table td:last-child{min-width:145px}
+.admin-body .price-manager-table .form-control,.admin-body .price-manager-table .form-select{font-size:.83rem}
+.admin-body .price-manager-row.is-dirty{--bs-table-bg:#fff8e5}
+.price-review-dialog{width:min(94vw,650px);max-height:85vh;border:1px solid #dce4dc;border-radius:14px;padding:0;box-shadow:0 25px 75px #10251b40}
+.price-review-dialog::backdrop{background:#10251ba6}
+.price-review-header,.price-review-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px}
+.price-review-header{border-bottom:1px solid #e5eae5}
+.price-review-actions{border-top:1px solid #e5eae5}
+.price-review-list{padding:4px 24px;overflow-y:auto;max-height:55vh}
+.price-review-item{padding:15px 0;border-bottom:1px solid #e8ece8}
+.price-review-item:last-child{border-bottom:0}
+.price-review-change{font-size:.86rem;color:#4d5d52;margin-top:5px}
+.admin-theme-preview{height:270px;overflow:hidden;background:#f5f4ed;color:#173b2a;font-family:Arial,sans-serif}
+.admin-theme-preview-image{height:270px;width:100%;object-fit:cover}
+.admin-theme-preview-nav{height:47px;padding:0 5%;display:flex;justify-content:space-between;align-items:center;background:#fff;font-size:9px;letter-spacing:.09em}
+.admin-theme-preview-nav strong{font-size:18px;letter-spacing:.15em}.admin-theme-preview-nav strong span{color:#f06b54}
+.admin-theme-preview-hero{height:184px;display:grid;grid-template-columns:54% 46%}.admin-theme-preview-hero>div{padding:22px 7%;display:flex;flex-direction:column;justify-content:center;gap:13px}.admin-theme-preview-hero small{font-size:7px;letter-spacing:.13em}.admin-theme-preview-hero strong{font-size:30px;line-height:1.05;letter-spacing:-.05em;max-width:270px}.admin-theme-preview-hero span{font-size:8px;font-weight:700;letter-spacing:.08em}.admin-theme-preview-hero img{width:100%;height:100%;object-fit:cover}
+.admin-theme-preview-products{display:flex;justify-content:space-around;align-items:center;height:39px;font-size:8px;letter-spacing:.12em}
+.admin-theme-preview.is-bold{background:#171717;color:#fff}.admin-theme-preview.is-bold .admin-theme-preview-nav{background:#171717;color:#fff}.admin-theme-preview.is-bold .admin-theme-preview-hero strong{font-size:34px;text-transform:uppercase;letter-spacing:-.075em}.admin-theme-preview.is-bold .admin-theme-preview-hero span{background:#f06b54;color:#171717;padding:8px;align-self:start}.admin-theme-preview.is-bold .admin-theme-preview-products{background:#f06b54;color:#171717}
+.admin-theme-code{padding:16px;background:#20242b;color:#f2f2f2;border-radius:8px;white-space:pre-wrap;font-size:12px}

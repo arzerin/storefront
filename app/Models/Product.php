@@ -57,6 +57,25 @@ class Product extends Model
         return (int) $this->getRawOriginal('sale_price');
     }
 
+    public function saleStatus(): string
+    {
+        if ($this->getRawOriginal('sale_price') === null) return 'none';
+        if ($this->sale_starts_at && now()->lt($this->sale_starts_at)) return 'scheduled';
+        if ($this->sale_ends_at && now()->gte($this->sale_ends_at)) return 'ended';
+        return 'active';
+    }
+
+    public function pricingSnapshot(): string
+    {
+        return hash('sha256', json_encode([
+            (int) $this->getRawOriginal('price'),
+            $this->getRawOriginal('sale_price') === null ? null : (int) $this->getRawOriginal('sale_price'),
+            $this->sale_starts_at?->format('Y-m-d H:i:s'),
+            $this->sale_ends_at?->format('Y-m-d H:i:s'),
+            $this->discount_mode ?? 'combine',
+        ]));
+    }
+
     public function unitPriceCentsForQuantity(int $quantity): int
     {
         $regular = (int) $this->price->getAmount();

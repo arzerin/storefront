@@ -22,3 +22,41 @@
 
 .ayra-content-block-image{width:100%;height:190px;object-fit:cover;border-radius:8px;margin-bottom:17px}
 .ayra-builder-hero.no-image{grid-template-columns:1fr}.ayra-builder-hero.no-image>div{max-width:850px}.ayra-builder-template-campaign .ayra-builder-hero{position:relative;display:block;min-height:480px;background:#173b2a}.ayra-builder-template-campaign .ayra-builder-hero>img{position:absolute;inset:0;width:100%;height:100%;max-height:none;filter:brightness(.55)}.ayra-builder-template-campaign .ayra-builder-hero>div{position:relative;z-index:1;min-height:480px;max-width:760px;color:white}.ayra-builder-template-campaign .ayra-builder-hero h1,.ayra-builder-template-campaign .ayra-builder-hero p{color:white}.ayra-builder-template-campaign .ayra-builder-hero .ayra-eyebrow{color:#d8e6d7}.ayra-builder-template-information{max-width:1100px}.ayra-builder-template-information .ayra-builder-hero{min-height:320px;background:#e9eee2}.ayra-builder-template-information .ayra-builder-hero h1{font-size:clamp(38px,4vw,58px)}@media(max-width:650px){.ayra-builder-template-campaign .ayra-builder-hero>div{min-height:440px}}
+
+/* Keep checkout and discovery controls in view as their main content scrolls. */
+.ayra-payment-icon{width:48px;height:48px;flex:none;display:grid;place-items:center;border-radius:10px;background:#edf3e9;color:var(--ayra-green)}
+.ayra-payment-icon svg{width:29px;height:29px;display:block}
+.ayra-payment-option.active .ayra-payment-icon{background:#dcebd7}
+@media(min-width:901px){
+    .ayra-checkout-layout>.ayra-checkout-summary{position:sticky;top:96px;align-self:start;max-height:calc(100dvh - 112px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
+@media(min-width:651px){
+    .ayra-discovery-layout>.ayra-filter-panel,.ayra-discovery-layout>.ayra-recent-panel{position:sticky;top:96px;align-self:start;max-height:calc(100dvh - 112px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
+@media(max-width:650px){
+    .ayra-discovery-layout{display:block}
+    .ayra-discovery-layout>.ayra-filter-panel{position:sticky;top:72px;z-index:30;margin-bottom:20px;box-shadow:0 8px 20px rgba(26,51,36,.08)}
+}
+@media(max-width:900px){
+    .ayra-payment-page{padding-bottom:145px}
+    .ayra-checkout-mobile-action{display:flex;align-items:center;justify-content:space-between;gap:20px;position:fixed;left:0;right:0;bottom:0;z-index:39;padding:12px 4% calc(12px + env(safe-area-inset-bottom));background:rgba(250,248,242,.96);border-top:1px solid var(--ayra-line);box-shadow:0 -8px 30px rgba(26,51,36,.08);backdrop-filter:blur(12px)}
+    .ayra-checkout-mobile-total{display:flex;flex-direction:column;gap:2px;color:var(--ayra-deep)}
+    .ayra-checkout-mobile-total span{font-size:11px;color:var(--ayra-muted)}
+    .ayra-checkout-mobile-total strong{font-size:20px}
+    .ayra-checkout-mobile-action .ayra-button{min-width:220px}
+    .ayra-checkout-summary>.ayra-button{display:none}
+}
+@media(max-width:650px){
+    .ayra-checkout-mobile-action{display:block;padding:12px 18px calc(12px + env(safe-area-inset-bottom))}
+    .ayra-checkout-mobile-total{flex-direction:row;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .ayra-checkout-mobile-total strong{font-size:17px}
+    .ayra-checkout-mobile-action .ayra-button{width:100%;min-width:0}
+}
+
+/* Simple content sections available in the site builder. */
+.ayra-builder-free-text,.ayra-builder-header-text{padding:clamp(48px,7vw,96px) 6%}
+.ayra-builder-free-text>div{max-width:820px;margin:auto;color:#4d6053;font-size:clamp(16px,1.4vw,19px);line-height:1.85}
+.ayra-builder-header-text{background:#eef3e9;border-top:1px solid var(--ayra-line);border-bottom:1px solid var(--ayra-line)}
+.ayra-builder-header-text>div{max-width:900px;margin:auto;text-align:center}
+.ayra-builder-header-text h2{margin:0 0 20px;color:var(--ayra-deep);font-size:clamp(34px,4vw,56px);line-height:1.12;letter-spacing:-.05em}
+.ayra-builder-header-text p{margin:0;color:#53665a;font-size:clamp(16px,1.35vw,19px);line-height:1.75}

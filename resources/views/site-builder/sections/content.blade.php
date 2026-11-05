@@ -16,6 +16,12 @@
         @php($image = \App\Support\SiteBuilder::image($data))
         <section class="ayra-builder-split"><div class="ayra-builder-split-image">@if($image)<img src="{{ $image['path'] }}" alt="{{ $image['alt'] }}">@endif</div><div class="ayra-builder-split-copy"><span class="ayra-eyebrow">{{ $data['eyebrow'] ?? '' }}</span><h2>{{ $data['headline'] ?? '' }}</h2><p>{!! nl2br(e($data['body'] ?? '')) !!}</p>@if(!empty($data['button_label']) && !empty($data['button_url']))<a class="ayra-text-link" href="{{ $data['button_url'] }}">{{ $data['button_label'] }} ↗</a>@endif</div></section>
         @break
+    @case('free_text')
+        <section class="ayra-builder-free-text"><div>{!! nl2br(e($data['body'] ?? '')) !!}</div></section>
+        @break
+    @case('header_text')
+        <section class="ayra-builder-header-text"><div><h2>{{ $data['headline'] ?? '' }}</h2><p>{!! nl2br(e($data['body'] ?? '')) !!}</p></div></section>
+        @break
     @case('collections')
         @php($ids = $data['collection_ids'] ?? [])
         @php($edits = \App\Models\Collection::where('is_published', true)->whereHas('products', fn ($q) => $q->where('is_published', true))->with(['products' => fn ($q) => $q->where('is_published', true)->with('featured_image')])->when($ids, fn ($q) => $q->whereIn('id', $ids))->limit(6)->get())

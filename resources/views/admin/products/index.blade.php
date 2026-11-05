@@ -13,6 +13,7 @@
     <div class="card-header d-flex flex-wrap align-items-center gap-3">
         <h3 class="card-title mb-0 me-auto">Catalogue</h3>
         <form method="get" action="{{ route('admin.products.index') }}" class="d-flex gap-2" role="search"><input name="search" value="{{ $search }}" class="form-control form-control-sm" placeholder="Search name or category" aria-label="Search products"><button class="btn btn-sm btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button></form>
+        <a href="{{ route('admin.prices.index') }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-currency-dollar me-1"></i>Price manager</a>
         <a href="{{ route('admin.products.create') }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add product</a>
     </div>
     <div class="card-body p-0">

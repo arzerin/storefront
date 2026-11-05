@@ -1,0 +1,62 @@
+/* Bold contemporary — site-wide design layer. See resources/themes/README.md for CSS hooks. */
+:root{--ayra-green:#171717;--ayra-deep:#101010;--ayra-soft:#f5dfd7;--ayra-cream:#f7f4ef;--ayra-stone:#e9e5df;--ayra-line:#d8d3cb;--ayra-ink:#161616;--ayra-muted:#66615d;--ayra-white:#fff;--bold-accent:#f06b54}
+body.ayra-body{background:#f7f4ef;color:#161616;font-family:'DM Sans',Arial,sans-serif}
+.ayra-shell{overflow:clip}
+.ayra-nav{background:#171717;border-bottom:1px solid #333;color:#fff}
+.ayra-nav-inner{max-width:none;height:84px;padding:0 4.5%}
+.ayra-nav .ayra-brand,.ayra-nav-links a,.ayra-nav-actions a,.ayra-nav-actions button{color:#fff}
+.ayra-brand{font-weight:700;letter-spacing:-.06em;font-size:32px}
+.ayra-brand span,.ayra-heading-row h2 span,.ayra-page-heading h1 span,.ayra-result-card h1 span,.ayra-pairs h2 span{color:var(--bold-accent)}
+.ayra-nav-links a{text-transform:uppercase;letter-spacing:.13em;font-size:11px}
+.ayra-nav-links a:hover,.ayra-nav-actions a:hover{color:var(--bold-accent)}
+.ayra-bag-count{background:var(--bold-accent);color:#171717}
+.ayra-menu-toggle span{background:#fff}
+.ayra-mobile-menu{background:#171717;color:#fff}
+.ayra-hero{background:#171717;color:#fff;min-height:600px}
+.ayra-hero-copy{background:#171717;color:#fff}
+.ayra-hero h1,.ayra-hero-copy h1{color:#fff;max-width:800px;font-size:clamp(58px,7.6vw,132px);line-height:.88;letter-spacing:-.085em;text-transform:uppercase}
+.ayra-hero p,.ayra-hero-copy p{color:#d5d0ca}
+.ayra-hero .ayra-eyebrow{color:var(--bold-accent)}
+.ayra-hero-photo img{filter:contrast(1.1) saturate(.83)}
+.ayra-button,.ayra-search-go{background:var(--bold-accent);border-color:var(--bold-accent);color:#171717;border-radius:0;text-transform:uppercase;letter-spacing:.1em;font-size:12px;font-weight:700}
+.ayra-button:hover,.ayra-search-go:hover{background:#dd563f;border-color:#dd563f;color:#171717}
+.ayra-outline-button{border-radius:0;border-color:#171717;text-transform:uppercase;letter-spacing:.1em;font-size:12px}
+.ayra-eyebrow,.ayra-product-label{color:#d65843;text-transform:uppercase;letter-spacing:.18em;font-weight:700}
+.ayra-section,.ayra-discovery,.ayra-collections{background:#f7f4ef}
+.ayra-heading-row h2,.ayra-page-heading h1,.ayra-detail-info h1,.ayra-builder-hero h1{font-weight:700;letter-spacing:-.07em;line-height:.96;text-transform:uppercase}
+.ayra-heading-row h2{font-size:clamp(40px,5vw,76px)}
+.ayra-benefits{background:var(--bold-accent);color:#171717;border:0;text-transform:uppercase;letter-spacing:.08em}
+.ayra-collection-card,.ayra-product-image,.ayra-gallery-main,.ayra-cart-photo,.ayra-content-block{border-radius:0}
+.ayra-collection-card img,.ayra-product-image img{filter:contrast(1.08) saturate(.85);transition:transform .55s ease,filter .55s ease}
+.ayra-collection-card:hover img,.ayra-product-card:hover .ayra-product-image img{transform:scale(1.045);filter:contrast(1.1) saturate(1)}
+.ayra-product-card{background:transparent}
+.ayra-card-title{font-weight:700;text-transform:uppercase;letter-spacing:-.02em}
+.ayra-filter-panel,.ayra-recent-panel,.ayra-cart-list,.ayra-checkout-summary,.ayra-payment-card,.ayra-order-panel,.ayra-result-card{background:#fff;border:1px solid #d8d3cb;border-radius:0;box-shadow:none}
+.ayra-filter-top,.ayra-checkout-summary h2,.ayra-payment-main h2,.ayra-order-panel h2{text-transform:uppercase;letter-spacing:-.04em}
+.ayra-detail-info h1{font-size:clamp(50px,5.8vw,90px)}
+.ayra-gallery-main{background:#e6e0d7}
+.ayra-size-options button,.ayra-quantity,.ayra-payment-icon{border-radius:0}
+.ayra-size-options button.selected,.ayra-payment-option.active .ayra-payment-icon{background:#171717;color:#fff}
+.ayra-payment-option.active{border-color:#171717}
+.ayra-result-icon.success{background:#171717;color:var(--bold-accent)}
+.ayra-result-icon.failed{background:#ffe5dc;color:#b8402d}
+.ayra-footer{background:#171717;color:#f7f4ef;border:0}
+.ayra-footer .ayra-brand{color:#fff}
+.ayra-footer a:hover{color:var(--bold-accent)}
+.ayra-builder-header-text{background:var(--bold-accent);border-color:var(--bold-accent)}
+.ayra-builder-header-text h2,.ayra-builder-header-text p{color:#171717}
+.ayra-builder-hero{background:#171717;color:#fff}
+.ayra-builder-hero h1,.ayra-builder-hero p{color:#fff}
+.ayra-builder-split{background:#f7f4ef}
+.ayra-builder-faq summary{font-weight:700;text-transform:uppercase}
+body.store-body[data-theme="bold-contemporary"]{background:#f7f4ef;color:#171717}
+body.store-body[data-theme="bold-contemporary"] .auth-shell{background:#f7f4ef}
+body.store-body[data-theme="bold-contemporary"] .auth-side{background:#171717}
+body.store-body[data-theme="bold-contemporary"] .auth-side p{font-family:'DM Sans',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:-.07em;line-height:.97}
+body.store-body[data-theme="bold-contemporary"] .auth-side p em{color:#f06b54;font-style:normal}
+body.store-body[data-theme="bold-contemporary"] .auth-side .brand-dot{color:#f06b54}
+body.store-body[data-theme="bold-contemporary"] .auth-heading h1{font-family:'DM Sans',Arial,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:-.07em}
+body.store-body[data-theme="bold-contemporary"] .auth-card button[type=submit]{background:#f06b54;color:#171717}
+body.store-body[data-theme="bold-contemporary"] .auth-card a:not(.brand){color:#b94a38}
+@media(max-width:900px){.ayra-nav-links{display:none}.ayra-nav-actions{margin-left:auto}.ayra-menu-toggle{display:block}.ayra-mobile-menu{top:84px}.ayra-hero h1,.ayra-hero-copy h1{font-size:clamp(48px,8vw,82px)}}
+@media(max-width:650px){.ayra-nav-inner{height:70px}.ayra-mobile-menu{top:70px}.ayra-brand{font-size:27px}.ayra-hero h1,.ayra-hero-copy h1{font-size:clamp(48px,12vw,76px)}.ayra-checkout-mobile-action{background:#171717;color:#fff}.ayra-checkout-mobile-total,.ayra-checkout-mobile-total span,.ayra-checkout-mobile-total strong{color:#fff}}
